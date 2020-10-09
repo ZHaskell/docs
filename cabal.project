@@ -1,0 +1,5 @@
+packages: */*.cabal
+
+package Z-Data
+package Z-IO
+package Z-Examples

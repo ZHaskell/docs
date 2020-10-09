@@ -1,0 +1,6 @@
+[submodule "z-data"]
+	path = z-data
+	url = https://github.com/haskell-Z/z-data.git
+[submodule "z-io"]
+	path = z-io
+	url = https://github.com/haskell-Z/z-io.git
