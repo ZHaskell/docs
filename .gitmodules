@@ -4,3 +4,9 @@
 [submodule "z-io"]
 	path = z-io
 	url = https://github.com/haskell-Z/z-io.git
+[submodule "z-example"]
+	path = z-example
+	url = git@github.com:haskell-Z/z-example.git
+[submodule "z-botan"]
+	path = z-botan
+	url = git@github.com:haskell-Z/z-botan.git
