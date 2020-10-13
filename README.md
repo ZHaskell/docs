@@ -39,7 +39,7 @@
 
 ## Example usage
 
-Check [Z-Example]((https://github.com/haskell-Z/z-example) for examples.
+Check [Z-Example](https://github.com/haskell-Z/z-example) for examples.
 
 ## Dev guide
 
