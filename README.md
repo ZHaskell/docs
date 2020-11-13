@@ -16,7 +16,7 @@
 
 * [Z-IO](https://github.com/haskell-Z/z-io)
 
-  [![Hackage](https://img.shields.io/hackage/v/Z-IO.svg?style=flat)](https://hackage.haskell.org/package/Z-IO) [![Linux Build Status](https://github.com/haskell-Z/z-io/workflows/ubuntu-ci/badge.svg)](https://github.com/haskell-Z/z-io/actions) [![MacOS Build Status](https://github.com/haskell-Z/z-io/workflows/oxs-ci/badge.svg)](https://github.com/haskell-Z/z-io/actions) [![Windows Build Status](https://github.com/haskell-Z/z-io/workflows/win-ci/badge.svg)](https://github.com/haskell-Z/z-io/actions)
+  [![Hackage](https://img.shields.io/hackage/v/Z-IO.svg?style=flat)](https://hackage.haskell.org/package/Z-IO) [![Linux Build Status](https://github.com/haskell-Z/z-io/workflows/ubuntu-ci/badge.svg)](https://github.com/haskell-Z/z-io/actions) [![MacOS Build Status](https://github.com/haskell-Z/z-io/workflows/osx-ci/badge.svg)](https://github.com/haskell-Z/z-io/actions) [![Windows Build Status](https://github.com/haskell-Z/z-io/workflows/win-ci/badge.svg)](https://github.com/haskell-Z/z-io/actions)
 
   * IO resource management, resource pool
   * File system operations
