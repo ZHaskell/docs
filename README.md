@@ -1,5 +1,5 @@
 <p align=center>
-  Welcome to project Z, an initiative to build a Haskell engineering eco-system.
+  Welcome to project Z, a high-performance Haskell engineering eco-system.
 </p>
 
 ## Packages
@@ -40,3 +40,9 @@
 ## Example usage
 
 Check [Z-Example](https://github.com/haskell-Z/z-example) for examples.
+
+# Sponsors
+    
+[<img src="https://static.emqx.net/images/logo.svg" width="128">](https://emqx.io)
+
+Project Z is maintained by [emq](https://emqx.io).
