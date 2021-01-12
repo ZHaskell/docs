@@ -40,19 +40,3 @@
 ## Example usage
 
 Check [Z-Example](https://github.com/haskell-Z/z-example) for examples.
-
-## Dev guide
-
-```bash
-# get code
-git clone --recursive git@github.com:haskell-Z/Z.git 
-cd z-io
-# build Z-IO for example
-cabal build Z-IO
-# test
-cabal run Z-IO-Test
-# install 
-cabal install
-# generate document
-cabal haddock
-```
