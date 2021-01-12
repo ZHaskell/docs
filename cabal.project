@@ -3,3 +3,5 @@ packages: */*.cabal
 package Z-Data
 package Z-IO
 package Z-Examples
+package Z-MessagePack
+package Z-YAML
