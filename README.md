@@ -1,5 +1,5 @@
 <p align=center>
-  Welcome to project Z, a high-performance Haskell engineering eco-system.
+  Welcome to Z.Haskell, a high-performance Haskell engineering eco-system.
 </p>
 
 ## Packages
