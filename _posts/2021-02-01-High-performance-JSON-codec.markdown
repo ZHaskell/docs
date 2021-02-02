@@ -6,6 +6,7 @@ author: Dong
 categories: performance 
 ---
 
+High performance JSON
 {% highlight haskell %}
-print "WIP"
+
 {% endhighlight %}
