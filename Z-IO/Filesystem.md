@@ -22,20 +22,20 @@ import qualified Z.IO.FileSystem as FS
 If it's OK to load a file into memory at once, you can use following:
 
 ```haskell
-quickReadFile :: HasCallStack => CBytes -> IO Bytes
-quickReadTextFile :: HasCallStack => CBytes -> IO Text
-quickWriteFile :: HasCallStack => CBytes -> Bytes -> IO ()
-quickWriteTextFile :: HasCallStack => CBytes -> Text -> IO ()
+readFile :: HasCallStack => CBytes -> IO Bytes
+readTextFile :: HasCallStack => CBytes -> IO Text
+writeFile :: HasCallStack => CBytes -> Bytes -> IO ()
+writeTextFile :: HasCallStack => CBytes -> Text -> IO ()
 ```
 
 `CBytes` is Z's file path type, `Bytes`, `Text` are binary and textual content type respectively, which all be document in Z-Data section. For now, all you need to know is Z-IO assumes UTF-8 encoding everywhere: both filepath and text content are assumed using UTF-8 encoding. 
 
 
 ```haskell
-> FS.quickWriteTextFile "./test_file" "hello world!"
-> FS.quickReadFile "./test_file" 
+> FS.writeTextFile "./test_file" "hello world!"
+> FS.readFile "./test_file" 
 [104,101,108,108,111,32,119,111,114,108,100,33]
-> FS.quickReadTextFile "./test_file" 
+> FS.readTextFile "./test_file" 
 "hello world!"
 ```
 
@@ -47,7 +47,7 @@ Now let's see a more complicated function:
 initFile :: CBytes
          -> FileFlag        -- ^ Opening flags, e.g. 'O_CREAT' @.|.@ 'O_RDWR'
          -> FileMode        -- ^ Sets the file mode (permission and sticky bits),
-                            -- but only if the file was created, see 'DEFAULT_MODE'.
+                            -- but only if the file was created, see 'DEFAULT_FILE_MODE'.
          -> Resource File
 ```
 
@@ -66,9 +66,9 @@ We simplified those two functions' type a little bit, and here is the idea: `wit
 import           Z.IO       -- this module re-export Z.IO.Resource and other common stuff
 import qualified Z.IO.FileSystem as FS
 
-withResource (FS.initFile "./test_file" FS.O_RDWR FS.DEFAULT_MODE) $ \ file -> do
+withResource (FS.initFile "./test_file" FS.O_RDWR FS.DEFAULT_FILE_MODE) $ \ file -> do
     bi <- newBufferedInput file
-    printLineStd =<< readLine bi
+    printStd =<< readLine bi
 ```
 
 `initFile` function doesn't open the file, it just record how to open and close the file. Everytime you want to do something about the file, use `withResource` to open(and close) it, and that's all about resource handling in Z.
@@ -96,11 +96,23 @@ There's a set of functions working on `BufferedInput/BufferedOutput` in `Z.IO.Bu
 
 ```haskell
 import           Z.IO       
-import qualified Z.IO.FileSystem as FS
+import qualified Z.IO.FileSystem    as FS
+import qualified Z.Data.Vector      as V
 
+main :: IO ()
 main = do
-    getArgs
-withResource (FS.initFile "./test_file" FS.O_RDWR FS.DEFAULT_MODE) $ \ file -> do
-    bi <- newBufferedInput file
-    printLineStd =<< readLine bi
+    -- get file path from command line
+    (_:path:_) <- getArgs
+    withResource (FS.initFile path FS.O_RDWR FS.DEFAULT_FILE_MODE) $ \ file -> do
+        bi <- newBufferedInput file
+        printStd =<< loop bi 0
+  where
+    loop :: BufferedInput -> Int -> IO Int
+    loop input !wc = do
+        -- read a single line without linefeed dropped
+        line <- readLine input
+        case line of
+            Just line' ->
+                loop input (wc + length (V.words line'))
+            _ -> return wc
 ```

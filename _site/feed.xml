@@ -1,1 +1,90 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.6">Jekyll</generator><link href="http://localhost:4000/docs/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/docs/" rel="alternate" type="text/html" /><updated>2021-02-03T09:51:50+08:00</updated><id>http://localhost:4000/docs/feed.xml</id><title type="html">Z.Haskell</title><subtitle>The document site for Haskell Project Z.</subtitle><entry><title type="html">High performance JSON codec</title><link href="http://localhost:4000/docs/performance/2020/11/24/High-performance-JSON-codec.html" rel="alternate" type="text/html" title="High performance JSON codec" /><published>2020-11-24T06:52:44+08:00</published><updated>2020-11-24T06:52:44+08:00</updated><id>http://localhost:4000/docs/performance/2020/11/24/High-performance-JSON-codec</id><content type="html" xml:base="http://localhost:4000/docs/performance/2020/11/24/High-performance-JSON-codec.html">&lt;p&gt;High performance JSON&lt;/p&gt;</content><author><name>Dong</name></author><category term="performance" /><summary type="html">High performance JSON</summary></entry></feed>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.6">Jekyll</generator><link href="http://localhost:4000/docs/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/docs/" rel="alternate" type="text/html" /><updated>2021-02-04T00:48:31+08:00</updated><id>http://localhost:4000/docs/feed.xml</id><title type="html">Z.Haskell</title><subtitle>The document site for Haskell Project Z.</subtitle><entry><title type="html">High-performance JSON codec</title><link href="http://localhost:4000/docs/performance/2021/02/02/High-performance-JSON-codec.html" rel="alternate" type="text/html" title="High-performance JSON codec" /><published>2021-02-02T06:52:44+08:00</published><updated>2021-02-02T06:52:44+08:00</updated><id>http://localhost:4000/docs/performance/2021/02/02/High-performance-JSON-codec</id><content type="html" xml:base="http://localhost:4000/docs/performance/2021/02/02/High-performance-JSON-codec.html">&lt;p&gt;JSON processing is a fundamental building block in modern network applications. It’s also a large module in &lt;a href=&quot;//hackage.haskell.org/package/Z-Data&quot;&gt;Z-Data&lt;/a&gt; package. With careful optimization, we managed to get a 1.5X - 3X encoding and 3X decoding performance boost comparing to &lt;a href=&quot;//hackage.haskell.org/package/aeson&quot;&gt;aeson&lt;/a&gt;, a widely used JSON package on hackage.&lt;/p&gt;
+
+&lt;p&gt;&lt;!--more--&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;benchmark-result&quot;&gt;Benchmark Result&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://github.com/ZHaskell/benchmarks/blob/master/json-benchmark/json-benchmark-result.png?raw=true&quot; alt=&quot;bench-result&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&quot;//github.com/ZHaskell/z-benchmarks&quot;&gt;above benchmarks&lt;/a&gt; running on an MBP13 2020(2 GHz Quad-Core Intel Core i5), Each benchmark runs a certain JSON task with fixed iterations, using &lt;a href=&quot;//github.com/ZHaskell/benchmarks/tree/master/asset/json-data&quot;&gt;sample data&lt;/a&gt;. Some notes on benchmarks code:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Benchmarks labeled with &lt;code class=&quot;highlighter-rouge&quot;&gt;encode&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;decode&lt;/code&gt; bench the conversion between JSON documents and JSON intermedia representation.&lt;/li&gt;
+  &lt;li&gt;Benchmarks labeled with &lt;code class=&quot;highlighter-rouge&quot;&gt;typed encode&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;typed decode&lt;/code&gt; bench the conversion between JSON documents and Haskell ADT.&lt;/li&gt;
+  &lt;li&gt;All ADTs’ instances are deriving using GHC generic mechanism, no manual conversion code is required.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;fast-escaping-handling&quot;&gt;Fast escaping handling&lt;/h2&gt;
+
+&lt;p&gt;Surprisingly, when processing JSON, one can’t directly copy strings because they may be &lt;a href=&quot;https://tools.ietf.org/html/rfc8259#page-8&quot;&gt;escaped&lt;/a&gt;, which brings a quite big performance challenge. In &lt;a href=&quot;//hackage.haskell.org/package/Z-Data&quot;&gt;Z-Data&lt;/a&gt; we carefully arranged the code path to avoid performance hit:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;When encoding text value&lt;/p&gt;
+
+    &lt;ol&gt;
+      &lt;li&gt;Run a prescan loop to find if we need escaping, and how much space we need to write the escaped string if escaping is needed.&lt;/li&gt;
+      &lt;li&gt;If there’s no escaping needed, vectorized &lt;code class=&quot;highlighter-rouge&quot;&gt;copyByteArray#&lt;/code&gt; is used to directly write text into the output buffer.&lt;/li&gt;
+      &lt;li&gt;Otherwise, go through the escaping loop.&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;When decoding JSON string&lt;/p&gt;
+
+    &lt;ol&gt;
+      &lt;li&gt;Run a prescan to find the end of the string, record if unescaping is needed at the same time.&lt;/li&gt;
+      &lt;li&gt;If no unescaping is needed, a vectorized UTF8 validation is used.&lt;/li&gt;
+      &lt;li&gt;Otherwise, go through a UTF8 validation loop extended with JSON unescaping logic.&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;These optimizations are possible because &lt;a href=&quot;//hackage.haskell.org/package/Z-Data&quot;&gt;Z-Data&lt;/a&gt; uses UTF8 encoding &lt;code class=&quot;highlighter-rouge&quot;&gt;Text&lt;/code&gt; type, which could save considerable time on the non-escaping path.&lt;/p&gt;
+
+&lt;h2 id=&quot;irintermedia-represatation&quot;&gt;IR(intermedia represatation)&lt;/h2&gt;
+
+&lt;p&gt;Another optimization opportunity comes from the new JSON document IR design. In &lt;a href=&quot;//hackage.haskell.org/package/Z-Data&quot;&gt;Z-Data&lt;/a&gt; the IR type use vector of key-value pair to represent JSON objects:&lt;/p&gt;
+
+&lt;div class=&quot;language-haskell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kr&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Object&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;Vector&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;Text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+           &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Array&lt;/span&gt;  &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;Vector&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+           &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;Text&lt;/span&gt;
+           &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Number&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Scientific&lt;/span&gt;
+           &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Bool&lt;/span&gt;   &lt;span class=&quot;kt&quot;&gt;Bool&lt;/span&gt;
+           &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Null&lt;/span&gt;
+         &lt;span class=&quot;kr&quot;&gt;deriving&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;Eq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Show&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Typeable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Generic&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+         &lt;span class=&quot;kr&quot;&gt;deriving&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;anyclass&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Print&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This representation has many benefits:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Preserve original key-value order, so that round-trip processing is possible.&lt;/li&gt;
+  &lt;li&gt;User can choose different de-duplicate strategys when converting IR to ADT.&lt;/li&gt;
+  &lt;li&gt;It’s faster to construct an IR value or convert ADT to IR.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;By default &lt;a href=&quot;//hackage.haskell.org/package/Z-Data&quot;&gt;Z-Data&lt;/a&gt; use &lt;a href=&quot;//hackage.haskell.org/package/Z-Data/docs/Z-Data-Vector-FlatMap.html&quot;&gt;FlatMap&lt;/a&gt; when converting IR to ADT, which is simply a sorted vector of key-value pair. It can be constructed by sorting the original key-value pairs in O(N*logN) and looked up using binary-search in O(logN).&lt;/p&gt;
+
+&lt;h2 id=&quot;parser-and-builder-facility&quot;&gt;Parser and Builder facility&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;//hackage.haskell.org/package/Z-Data&quot;&gt;Z-Data&lt;/a&gt; uses &lt;a href=&quot;https://hackage.haskell.org/package/Z-Data/docs/Z-Data-Vector.html#t:Bytes&quot;&gt;Bytes&lt;/a&gt;, a vector type based on &lt;code class=&quot;highlighter-rouge&quot;&gt;ByteArray#&lt;/code&gt; to represent binary data, it’s different from traditional bytestring ones that use &lt;code class=&quot;highlighter-rouge&quot;&gt;Addr#&lt;/code&gt;(pointer). It’s necessary to provide a different set of &lt;code class=&quot;highlighter-rouge&quot;&gt;Builder&lt;/code&gt;s and &lt;code class=&quot;highlighter-rouge&quot;&gt;Parser&lt;/code&gt;s to work on that representation. In both cases, simple CPSed monad is chosen to make compiled code fast.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;-- Z.Data.Builder.Base
+newtype Builder a = Builder { 
+    runBuilder :: (a -&amp;gt; BuildStep)  -- next write continuation
+               -&amp;gt; BuildStep
+}
+
+-- Z.Data.Parser.Base
+newtype Parser a = Parser {
+    runParser :: forall r . (ParseError -&amp;gt; ParseStep r)     -- fail continuation
+              -&amp;gt; (a -&amp;gt; ParseStep r)                         -- success continuation
+              -&amp;gt; ParseStep r
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;These types are almost the simplest CPS monads one can write, and GHC is particularly good at optimizing the composition of these monads.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;This benchmark compared &lt;a href=&quot;//hackage.haskell.org/package/Z-Data&quot;&gt;Z-Data&lt;/a&gt; to widely used Haskell package &lt;a href=&quot;//hackage.haskell.org/package/aeson&quot;&gt;aeson&lt;/a&gt;. The result shows that the new &lt;code class=&quot;highlighter-rouge&quot;&gt;Builder&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;Parser&lt;/code&gt; facility works as expected, and our optimizing techniques can bring a huge performance improvement.&lt;/p&gt;</content><author><name>Dong</name></author><category term="performance" /><summary type="html">JSON processing is a fundamental building block in modern network applications. It’s also a large module in Z-Data package. With careful optimization, we managed to get a 1.5X - 3X encoding and 3X decoding performance boost comparing to aeson, a widely used JSON package on hackage.</summary></entry></feed>

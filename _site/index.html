@@ -11,11 +11,12 @@
             .z-button:hover{background:#5739ce;}
             .z-h3{margin-bottom:0.3em}
             .z-footer-text{display:inline-block; font-size:18px;vertical-align:middle;width:80px;}
+            .z-footer-text-long{display:inline-block; font-size:18px;vertical-align:middle;width:100%;margin-top:4px}
             .z-footer-link{display:inline-block; text-decoration:none;vertical-align:middle;margin-right:4px;}
             .z-footer-linkgroup{margin-bottom:12px;}
             .z-lib-group{display:inline-block;width:30%;min-width:56px;padding: 12px}
             .z-lib-group p{margin: 0}
-            .z-feature-box{flex:1; padding: 24px}
+            .z-feature-box{flex:1; padding: 24px 28px}
             .z-feature-box p{color:#fff;margin: 0 0 4px}
             .z-feature-box h2{color:#fff; margin: 0 0 24px;}
         </style>
@@ -40,7 +41,7 @@
             </div>
         </nav>
         <div style="position:relative;padding:64px 12px;text-align:center;background:#f5f6fa;overflow:hidden;">
-        <svg style="position:absolute;top:0;right:-28px;height:100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="481.8897pt" height="340.1574pt" viewBox="0 0 481.8897 340.1574" version="1.1"> <defs> <clipPath id="clip1"> <path d="M 0 340.15625 L 481.890625 340.15625 L 481.890625 0 L 0 0 L 0 340.15625 Z M 0 340.15625 "/> </clipPath> </defs> <g id="surface0"> <g clip-path="url(#clip1)" clip-rule="nonzero"> <path style=" stroke:none;fill-rule: nonzero; fill: rgb(100%,100%,100%); fill-opacity: 1;" d="M 0 340.15625 L 113.386719 170.078125 L 0 0 L 85.039062 0 L 198.425781 170.078125 L 85.039062 340.15625 L 0 340.15625 Z M 0 340.15625 "/> <path style=" stroke:none;fill-rule: nonzero; fill: rgb(100%,100%,100%); fill-opacity: 0.6;" d="M 113.386719 340.15625 L 226.773438 170.078125 L 113.386719 0 L 198.425781 0 L 425.195312 340.15625 L 340.15625 340.15625 L 269.292969 233.859375 L 198.425781 340.15625 L 113.386719 340.15625 Z M 113.386719 340.15625 "/> <path style=" stroke:none;fill-rule: nonzero; fill: rgb(100%,100%,100%); fill-opacity: 1;" d="M 387.402344 240.945312 L 349.609375 184.253906 L 481.890625 184.25 L 481.890625 240.945312 L 387.402344 240.945312 Z M 387.402344 240.945312 "/> <path style=" stroke:none;fill-rule: nonzero; fill: rgb(100%,100%,100%); fill-opacity: 1;" d="M 330.710938 155.90625 L 292.914062 99.214844 L 481.890625 99.210938 L 481.890625 155.90625 L 330.710938 155.90625 Z M 330.710938 155.90625 "/> </g> </g> </svg>
+        <svg style="position:absolute;top:0;right:-60px;height:100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="481.8897pt" height="340.1574pt" viewBox="0 0 481.8897 340.1574" version="1.1"> <defs> <clipPath id="clip1"> <path d="M 0 340.15625 L 481.890625 340.15625 L 481.890625 0 L 0 0 L 0 340.15625 Z M 0 340.15625 "/> </clipPath> </defs> <g id="surface0"> <g clip-path="url(#clip1)" clip-rule="nonzero"> <path style=" stroke:none;fill-rule: nonzero; fill: rgb(100%,100%,100%); fill-opacity: 1;" d="M 0 340.15625 L 113.386719 170.078125 L 0 0 L 85.039062 0 L 198.425781 170.078125 L 85.039062 340.15625 L 0 340.15625 Z M 0 340.15625 "/> <path style=" stroke:none;fill-rule: nonzero; fill: rgb(100%,100%,100%); fill-opacity: 0.6;" d="M 113.386719 340.15625 L 226.773438 170.078125 L 113.386719 0 L 198.425781 0 L 425.195312 340.15625 L 340.15625 340.15625 L 269.292969 233.859375 L 198.425781 340.15625 L 113.386719 340.15625 Z M 113.386719 340.15625 "/> <path style=" stroke:none;fill-rule: nonzero; fill: rgb(100%,100%,100%); fill-opacity: 1;" d="M 387.402344 240.945312 L 349.609375 184.253906 L 481.890625 184.25 L 481.890625 240.945312 L 387.402344 240.945312 Z M 387.402344 240.945312 "/> <path style=" stroke:none;fill-rule: nonzero; fill: rgb(100%,100%,100%); fill-opacity: 1;" d="M 330.710938 155.90625 L 292.914062 99.214844 L 481.890625 99.210938 L 481.890625 155.90625 L 330.710938 155.90625 Z M 330.710938 155.90625 "/> </g> </g> </svg>
         <h1 style="position:relative">Fast/Concise/Modern Haskell Engineering Toolkits</h1>
         <h3 style="position:relative" class="z-h3">Z.Haskell is a set of high-performance and easy-to-use libraries written in Haskell</h3>
         <h3 style="position:relative" class="z-h3">Providing rich APIs for building fast and reliable applications</h3>
@@ -91,6 +92,9 @@
                     582.892308c35.446154-3.938462 63.015385-35.446154 63.015384-70.892308s-27.569231-66.953846-63.015384-70.892308H153.6h-3.938462c-39.384615 0-70.892308 31.507692-70.892307 70.892308s31.507692 70.892308 70.892307 70.892308h653.784616z" p-id="2737" fill="#27262b"></path></svg>
                     </a>
 
+                </div>
+                <div class="z-footer-linkgroup">
+                    <span class="z-footer-text-long">Released under BSD license</span>
                 </div>
             </div>
             <div style="padding: 24px;line-height:24px;flex:50">
