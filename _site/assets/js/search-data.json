@@ -2,97 +2,97 @@
     "doc": "Filesystem",
     "title": "Table of contents",
     "content": ". | Hello File | Resource Handling | Buffered I/O | . ",
-    "url": "http://localhost:4000/z-docs/Z-IO/Filesystem.html#table-of-contents",
+    "url": "http://localhost:4000/docs/Z-IO/Filesystem.html#table-of-contents",
     "relUrl": "/Z-IO/Filesystem.html#table-of-contents"
   },"1": {
     "doc": "Filesystem",
     "title": "Hello File",
     "content": "It’s easy to use Z-IO package’s filesystem module, first please import Z.IO.Filesystem: . import qualified Z.IO.FileSystem as FS . If it’s OK to load a file into memory at once, you can use following: . quickReadFile :: HasCallStack =&gt; CBytes -&gt; IO Bytes quickReadTextFile :: HasCallStack =&gt; CBytes -&gt; IO Text quickWriteFile :: HasCallStack =&gt; CBytes -&gt; Bytes -&gt; IO () quickWriteTextFile :: HasCallStack =&gt; CBytes -&gt; Text -&gt; IO () . CBytes is Z’s file path type, Bytes, Text are binary and textual content type respectively, which all be document in Z-Data section. For now, all you need to know is Z-IO assumes UTF-8 encoding everywhere: both filepath and text content are assumed using UTF-8 encoding. &gt; FS.quickWriteTextFile \"./test_file\" \"hello world!\" &gt; FS.quickReadFile \"./test_file\" [104,101,108,108,111,32,119,111,114,108,100,33] &gt; FS.quickReadTextFile \"./test_file\" \"hello world!\" . ",
-    "url": "http://localhost:4000/z-docs/Z-IO/Filesystem.html#hello-file",
+    "url": "http://localhost:4000/docs/Z-IO/Filesystem.html#hello-file",
     "relUrl": "/Z-IO/Filesystem.html#hello-file"
   },"2": {
     "doc": "Filesystem",
     "title": "Resource Handling",
     "content": "Now let’s see a more complicated function: . initFile :: CBytes -&gt; FileFlag -- ^ Opening flags, e.g. 'O_CREAT' @.|.@ 'O_RDWR' -&gt; FileMode -- ^ Sets the file mode (permission and sticky bits), -- but only if the file was created, see 'DEFAULT_MODE'. -&gt; Resource File . FileFlag and FileMode are bit constants controlling the file opening behavior, e.g. if we have read or write access, or if a new file will be created if there’s none. You can find more constants on hacakge’s document. What’s interesting here is that initFile function return a Resource File type instead of IO File. Resource is defined in Z.IO.Resource module, with a function to use it: . withResource :: HasCallStack =&gt; Resource a -- ^ resource management record -&gt; (a -&gt; IO b) -- ^ function working on a resource -&gt; IO b . We simplified those two functions’ type a little bit, and here is the idea: withResource will take care about resource opening and cleanup automatically, after you finish using it, or when exception happens. You only need to pass a function working on that resource. Now let’s read the file created above again: . import Z.IO -- this module re-export Z.IO.Resource and other common stuff import qualified Z.IO.FileSystem as FS withResource (FS.initFile \"./test_file\" FS.O_RDWR FS.DEFAULT_MODE) $ \\ file -&gt; do bi &lt;- newBufferedInput file printLineStd =&lt;&lt; readLine bi . initFile function doesn’t open the file, it just record how to open and close the file. Everytime you want to do something about the file, use withResource to open(and close) it, and that’s all about resource handling in Z. ",
-    "url": "http://localhost:4000/z-docs/Z-IO/Filesystem.html#resource-handling",
+    "url": "http://localhost:4000/docs/Z-IO/Filesystem.html#resource-handling",
     "relUrl": "/Z-IO/Filesystem.html#resource-handling"
   },"3": {
     "doc": "Filesystem",
     "title": "Buffered I/O",
     "content": "newBufferedInput and readLine functions in the code above are from Z.IO.Buffered module(also re-exported from Z.IO). In Z-IO, many IO devices(including File above) are instances to Input/Output class: . class Input i where readInput :: HasCallStack =&gt; i -&gt; Ptr Word8 -&gt; Int -&gt; IO Int class Output o where writeOutput :: HasCallStack =&gt; o -&gt; Ptr Word8 -&gt; Int -&gt; IO () . readInput and writeOutput works on pointers, which is not very convenient for directly usage. Open a BufferedInput or BufferedOutput to get auto managed buffered I/O: . newBufferedInput :: Input i =&gt; i -&gt; IO BufferedInput newBufferedOutput :: Output i =&gt; i -&gt; IO BufferedOutput . There’s a set of functions working on BufferedInput/BufferedOutput in Z.IO.Buffered, for example to implement a word counter for files: . import Z.IO import qualified Z.IO.FileSystem as FS main = do getArgs withResource (FS.initFile \"./test_file\" FS.O_RDWR FS.DEFAULT_MODE) $ \\ file -&gt; do bi &lt;- newBufferedInput file printLineStd =&lt;&lt; readLine bi . ",
-    "url": "http://localhost:4000/z-docs/Z-IO/Filesystem.html#buffered-io",
+    "url": "http://localhost:4000/docs/Z-IO/Filesystem.html#buffered-io",
     "relUrl": "/Z-IO/Filesystem.html#buffered-io"
   },"4": {
     "doc": "Filesystem",
     "title": "Filesystem",
     "content": " ",
-    "url": "http://localhost:4000/z-docs/Z-IO/Filesystem.html",
+    "url": "http://localhost:4000/docs/Z-IO/Filesystem.html",
     "relUrl": "/Z-IO/Filesystem.html"
   },"5": {
     "doc": "Benchmarks",
     "title": "Table of contents",
     "content": ". | TCP performance | . ",
-    "url": "http://localhost:4000/z-docs/benchmarks.html#table-of-contents",
+    "url": "http://localhost:4000/docs/benchmarks.html#table-of-contents",
     "relUrl": "/benchmarks.html#table-of-contents"
   },"6": {
     "doc": "Benchmarks",
     "title": "TCP performance",
     "content": "following number . ",
-    "url": "http://localhost:4000/z-docs/benchmarks.html#tcp-performance",
+    "url": "http://localhost:4000/docs/benchmarks.html#tcp-performance",
     "relUrl": "/benchmarks.html#tcp-performance"
   },"7": {
     "doc": "Benchmarks",
     "title": "Benchmarks",
     "content": " ",
-    "url": "http://localhost:4000/z-docs/benchmarks.html",
+    "url": "http://localhost:4000/docs/benchmarks.html",
     "relUrl": "/benchmarks.html"
   },"8": {
     "doc": "Blog",
     "title": "High performance JSON codec",
-    "content": "2020-11-24 06:52:44 +0800 by Dong . print \"WIP\" . | . ",
-    "url": "http://localhost:4000/z-docs/blog.html",
+    "content": "2020-11-24 06:52:44 +0800 by Dong . High performance JSON . | . ",
+    "url": "http://localhost:4000/docs/blog.html",
     "relUrl": "/blog.html"
   },"9": {
     "doc": "Blog",
     "title": "Blog",
     "content": ". | ",
-    "url": "http://localhost:4000/z-docs/blog.html",
+    "url": "http://localhost:4000/docs/blog.html",
     "relUrl": "/blog.html"
   },"10": {
     "doc": "Guide",
     "title": "Table of contents",
     "content": ". | Requirements | Installation | . ",
-    "url": "http://localhost:4000/z-docs/guide#table-of-contents",
+    "url": "http://localhost:4000/docs/guide#table-of-contents",
     "relUrl": "/guide#table-of-contents"
   },"11": {
     "doc": "Guide",
     "title": "Requirements",
     "content": "You need a working haskell compiler system: GHC(&gt;=8.6), cabal-install(&gt;=2.4). You can download pre-built binaries(GHC, cabal-install) and install manually, or use package management on your operating system if available: . | Mac users can get them via homebew: brew install ghc cabal-install. | Windows users can get them via chocolatey: choco install ghc cabal. | Ubuntu users are recommended to use ppa. | . ",
-    "url": "http://localhost:4000/z-docs/guide#requirements",
+    "url": "http://localhost:4000/docs/guide#requirements",
     "relUrl": "/guide#requirements"
   },"12": {
     "doc": "Guide",
     "title": "Installation",
     "content": "To use Z-IO package for example, add following lines to your project’s cabal file: ... build-depends: Z-IO == 0.1.* . Now run cabal build within your project directory, cabal should be able to download Z-IO dependency automatically. Let’s write a simple tcp echo server for example: . | Initialize a project with cabal. | . mkdir tcp-echo cd tcp-echo cabal init -i . Now cabal will ask you some simple questions about your project, then create a tcp-echo.cabal file automatically, which records the building configuration. | Add Z-IO and Z-Data to project’s cabal file. | . Now open tcp-echo.cabal file with a text editor, add following lines under executable section: ... build-depends: Z-IO == 0.5.* Z-Data == 0.5.* . | Edit Main.hs. | . Open src/Main.hs and add a simple echo tcp server: . You can check Z-Example for some example code. ",
-    "url": "http://localhost:4000/z-docs/guide#installation",
+    "url": "http://localhost:4000/docs/guide#installation",
     "relUrl": "/guide#installation"
   },"13": {
     "doc": "Guide",
     "title": "Guide",
     "content": " ",
-    "url": "http://localhost:4000/z-docs/guide",
+    "url": "http://localhost:4000/docs/guide",
     "relUrl": "/guide"
   },"14": {
     "doc": "Z-Data",
     "title": "Z-Data",
     "content": ". | Z-Data . | Array, vector(array slice), Bytes(Word8 vectors) | Text based UTF-8, basic unicode manipulating | FFI utilties | Parsing and building monad | JSON encoding and decoding | . | . ",
-    "url": "http://localhost:4000/z-docs/Z-Data/",
+    "url": "http://localhost:4000/docs/Z-Data/",
     "relUrl": "/Z-Data/"
   },"15": {
     "doc": "Z-IO",
     "title": "Z-IO",
     "content": "Z-IO package provides high-performance I/O operations based on libuv’s event loop and GHC lightweight threads. ",
-    "url": "http://localhost:4000/z-docs/Z-IO/",
+    "url": "http://localhost:4000/docs/Z-IO/",
     "relUrl": "/Z-IO/"
   }
 }
