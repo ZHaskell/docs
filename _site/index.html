@@ -13,8 +13,11 @@
             .z-footer-text{display:inline-block; font-size:18px;vertical-align:middle;width:80px;}
             .z-footer-link{display:inline-block; text-decoration:none;vertical-align:middle;margin-right:4px;}
             .z-footer-linkgroup{margin-bottom:12px;}
-            .z-lib-group{display:inline-block;width:30%}
+            .z-lib-group{display:inline-block;width:30%;min-width:56px;padding: 12px}
             .z-lib-group p{margin: 0}
+            .z-feature-box{flex:1; padding: 24px}
+            .z-feature-box p{color:#fff;margin: 0 0 4px}
+            .z-feature-box h2{color:#fff; margin: 0 0 24px;}
         </style>
     </head>
     <body>
@@ -36,20 +39,37 @@
                 </ul>
             </div>
         </nav>
-        <div style="position:relative;padding:64px 12px;text-align:center;border-bottom:1px solid #eeebee;
-            background:#f5f6fa;overflow:hidden;">
+        <div style="position:relative;padding:64px 12px;text-align:center;background:#f5f6fa;overflow:hidden;">
         <svg style="position:absolute;top:0;right:-28px;height:100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="481.8897pt" height="340.1574pt" viewBox="0 0 481.8897 340.1574" version="1.1"> <defs> <clipPath id="clip1"> <path d="M 0 340.15625 L 481.890625 340.15625 L 481.890625 0 L 0 0 L 0 340.15625 Z M 0 340.15625 "/> </clipPath> </defs> <g id="surface0"> <g clip-path="url(#clip1)" clip-rule="nonzero"> <path style=" stroke:none;fill-rule: nonzero; fill: rgb(100%,100%,100%); fill-opacity: 1;" d="M 0 340.15625 L 113.386719 170.078125 L 0 0 L 85.039062 0 L 198.425781 170.078125 L 85.039062 340.15625 L 0 340.15625 Z M 0 340.15625 "/> <path style=" stroke:none;fill-rule: nonzero; fill: rgb(100%,100%,100%); fill-opacity: 0.6;" d="M 113.386719 340.15625 L 226.773438 170.078125 L 113.386719 0 L 198.425781 0 L 425.195312 340.15625 L 340.15625 340.15625 L 269.292969 233.859375 L 198.425781 340.15625 L 113.386719 340.15625 Z M 113.386719 340.15625 "/> <path style=" stroke:none;fill-rule: nonzero; fill: rgb(100%,100%,100%); fill-opacity: 1;" d="M 387.402344 240.945312 L 349.609375 184.253906 L 481.890625 184.25 L 481.890625 240.945312 L 387.402344 240.945312 Z M 387.402344 240.945312 "/> <path style=" stroke:none;fill-rule: nonzero; fill: rgb(100%,100%,100%); fill-opacity: 1;" d="M 330.710938 155.90625 L 292.914062 99.214844 L 481.890625 99.210938 L 481.890625 155.90625 L 330.710938 155.90625 Z M 330.710938 155.90625 "/> </g> </g> </svg>
         <h1 style="position:relative">Fast/Concise/Modern Haskell Engineering Toolkits</h1>
         <h3 style="position:relative" class="z-h3">Z.Haskell is a set of high-performance and easy-to-use libraries written in Haskell</h3>
-        <h3 style="position:relative" class="z-h3">Providing rich APIs for building fast and reliable network applications</h3>
+        <h3 style="position:relative" class="z-h3">Providing rich APIs for building fast and reliable applications</h3>
         <a style="position:relative" class="z-button" href="/z-docs/guide"> Start! </a>
+        </div>
+
+        <div style="display:flex;overflow:hidden;color:#FFF;">
+            <div class="z-feature-box" style="background:#FF508F;"> 
+                <h2>Blazing Fast</h2>
+                <p><i>M</i> GHC lightweight threads on <i>N</i> event loop</p>
+                <p>Serve applications at fast speed with less CPU/memory</p>
+            </div>
+            <div class="z-feature-box" style="background:#FF8A64;"> 
+                <h2>Concise, Expressive</h2>
+                <p>Written in purely functional language <i>Haskell</i></p>
+                <p>Declarative coding with concise and composable types</p>
+            </div>
+            <div class="z-feature-box" style="background:#FFC552;"> 
+                <h2>Modern Codebase</h2>
+                <p>Cross-platform IO, UTF8 based text processing</p>
+                <p>Best practices from years of engineering design</p>
+            </div>
         </div>
 
         <div style="display:flex">
             <div style="padding:24px 32px;line-height:24px;flex:50">
                 <div  class="z-footer-linkgroup">
                     <span class="z-footer-text">Find us</span>
-                    <a class="z-footer-link" href="//github.com/haskell-z/Z">
+                    <a class="z-footer-link" href="//github.com/ZHaskell">
                         <svg width="28px" height="28px" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path class="tk-svg-path" d="M896 128q209 0 385.5 103t279.5 279.5 103 385.5q0 251-146.5 451.5t-378.5 277.5q-27 5-40-7t-13-30q0-3 .5-76.5t.5-134.5q0-97-52-142 57-6 102.5-18t94-39 81-66.5 53-105 20.5-150.5q0-119-79-206 37-91-8-204-28-9-81 11t-92 44l-38 24q-93-26-192-26t-192 26q-16-11-42.5-27t-83.5-38.5-85-13.5q-45 113-8 204-79 87-79 206 0 85 20.5 150t52.5 105 80.5 67 94 39 102.5 18q-39 36-49
                             103-21 10-45 15t-57 5-65.5-21.5-55.5-62.5q-19-32-48.5-52t-49.5-24l-20-3q-21 0-29 4.5t-5 11.5 9 14 13 12l7 5q22 10 43.5 38t31.5 51l10 23q13 38 44 61.5t67 30 69.5 7 55.5-3.5l23-4q0 38 .5 88.5t.5 54.5q0 18-13 30t-40 7q-232-77-378.5-277.5t-146.5-451.5q0-209 103-385.5t279.5-279.5 385.5-103zm-477 1103q3-7-7-12-10-3-13 2-3 7 7 12 9 6 13-2zm31 34q7-5-2-16-10-9-16-3-7 5 2 16 10 10 16 3zm30 45q9-7 0-19-8-13-17-6-9 5 0 18t17 7zm42 42q8-8-4-19-12-12-20-3-9 8 4 19 12 12 20 3zm57
                             25q3-11-13-16-15-4-19 7t13 15q15 6 19-6zm63 5q0-13-17-11-16 0-16 11 0 13 17 11 16 0 16-11zm58-10q-2-11-18-9-16 3-14 15t18 8 14-14z" fill="#27262b"></path></svg>
@@ -75,15 +95,19 @@
             </div>
             <div style="padding: 24px;line-height:24px;flex:50">
                 <div class="z-lib-group">
-                    <p>Z-IO</p> <a href="//github.com/haskell-z/z-io">Github</a>
+                    <p>Z-IO</p> <a href="//github.com/ZHaskell/z-io">Github</a>
                     <p><a href="//hackage.haskell.org/package/Z-IO">Haddock</a></p>
                 </div>
                 <div class="z-lib-group">
-                    <p>Z-Data</p> <a href="//github.com/haskell-z/z-data">Github</a>
+                    <p>Z-Data</p> <a href="//github.com/ZHaskell/z-data">Github</a>
                     <p><a href="//hackage.haskell.org/package/Z-Data">Haddock</a></p>
                 </div>
                 <div class="z-lib-group">
-                    <p>Z-YAML</p> <a href="//github.com/haskell-z/z-yaml">Github</a>
+                    <p>Z-MessagePack</p> <a href="//github.com/ZHaskell/z-messagepack">Github</a>
+                    <p><a href="//hackage.haskell.org/package/Z-MessagePack">Haddock</a></p>
+                </div>
+                <div class="z-lib-group">
+                    <p>Z-YAML</p> <a href="//github.com/ZHaskell/z-yaml">Github</a>
                     <p><a href="//hackage.haskell.org/package/Z-YAML">Haddock</a></p>
                 </div>
             </div>
