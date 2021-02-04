@@ -13,52 +13,79 @@ permalink: /guide
 
 ## Requirements
 
-You need a working haskell compiler system: GHC(>=8.6), cabal-install(>=2.4). You can download pre-built binaries([GHC](https://www.haskell.org/ghc/download.html),
+You need a working haskell compiler system: GHC(>={{site.data.version.ghc_version}}), cabal-install(>={{site.data.version.cabal_version}}). You can download pre-built binaries([GHC](https://www.haskell.org/ghc/download.html),
 [cabal-install](https://www.haskell.org/cabal/download.html)) and install manually, 
 or use package management on your operating system if available:
 * Mac users can get them via [homebew](//brew.sh/): `brew install ghc cabal-install`.
 * Windows users can get them via [chocolatey](//chocolatey.org): `choco install ghc cabal`.
-* Ubuntu users are recommended to use [ppa](//launchpad.net/~hvr/+archive/ubuntu/ghc).
+* Ubuntu users are recommended to use this [ppa](//launchpad.net/~hvr/+archive/ubuntu/ghc).
 
 ## Installation
 
-To use Z-IO package for example, add following lines to your project's cabal file:
+To use Z-IO package, for example, add the following lines to your project's cabal file:
 
 ```
 ...
-    build-depends:          Z-IO  == 0.5.*
+    build-depends:          Z-IO == {{site.data.version.z_version}}.*
 ```
 
-Now run `cabal build` within your project directory, cabal should be able to download Z-IO dependency automatically. Let's write a simple tcp echo server for example:
+Now run `cabal build` within your project directory, cabal should be able to download Z-IO dependency automatically. Let's write a simple TCP echo server for example:
 
 1. Initialize a project with `cabal`.
 
-```
-mkdir tcp-echo
-cd tcp-echo
-cabal init -i
-```
+    ```
+    mkdir tcp-echo
+    cd tcp-echo
+    cabal init -i
+    ```
 
-Now `cabal` will ask you some simple questions about your project, then create a `tcp-echo.cabal` file automatically, which records the building configuration.
+    Now, `cabal` will ask you some simple questions about your project, then create a `tcp-echo.cabal` file.
 
-2. Add Z-IO and Z-Data to project's cabal file.
+2. Add dependencies.
 
-Now open `tcp-echo.cabal` file with a text editor, add following lines under `executable` section:
+    Now open the` tcp-echo.cabal` file with a text editor, add the following lines under the `executable` section:
 
-```
-...
-    build-depends:          Z-IO  == 0.5.*
-                            Z-Data == 0.5.*
-```
+    ```
+    ...
+        build-depends:          Z-IO  == {{site.data.version.z_version}}.*
+                                Z-Data == {{site.data.version.z_version}}.*
+    ```
 
-3. Edit Main.hs.
+3. Edit code.
 
-Open `src/Main.hs` and add a simple echo tcp server:
+    Open `src/Main.hs` and add a simple echo TCP server:
 
-```
+    ```
+    import Control.Monad
+    import Z.IO
+    import Z.IO.Network
 
+    main :: IO ()
+    main = do
+        let addr = SocketAddrIPv4 ipv4Loopback 8080
+        startTCPServer defaultTCPServerConfig{ tcpListenAddr = addr } $ \ tcp -> do
+            i <- newBufferedInput tcp
+            o <- newBufferedOutput tcp
+            forever $ readBuffer i >>= writeBuffer o >> flushBuffer o
+    ```
 
-```
+4. Build!
 
-You can check [Z-Example](//github.com/haskell-Z/z-example) for some example code.
+    Make sure you have run `cabal update` to get the latest packages' index, then `cabal build` will start to download dependencies and build your project, you may see output like this:
 
+    ```
+    Resolving dependencies...
+    Build profile: -w ghc-{{site.data.version.ghc_version}} -O1
+    In order, the following will be built (use -v for more details):
+     - Z-Data-{{site.data.version.z_version}}.0.0 (lib) (requires download & build)
+     - Z-IO-{{site.data.version.z_version}}.0.0 (lib) (requires download & build)
+     - tcp-echo-0.1.0.0 (exe:tcp-echo) (first run)
+    Downloaded   Z-Data-{{site.data.version.z_version}}.0.0
+    Starting     Z-Data-{{site.data.version.z_version}}.0.0 (lib)
+    Building     Z-Data-{{site.data.version.z_version}}.0.0 (lib)
+    ...
+    ```
+
+    It may take a while for the first time build because cabal needs to download and built all the dependencies, building afterward will be faster after dependencies are cached.
+
+Now you can use `cabal run` to run your echo server and `nc 0.0.0.0 8080` to test it, and that's it! happy hacking.

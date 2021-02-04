@@ -16,7 +16,7 @@ Note benchmarks only record certain aspect of the code and the setup environment
 
 # JSON performance
 
-This benchmark compared [JSON module in Z-Data](https://hackage.haskell.org/package/Z-Data/docs/Z-Data-JSON.html) with [aeson](https://hackage.haskell.org/package/aeson), a widely used JSON package on hackage. See our analysis in [this blog post](/docs/performance/2021/02/01/High-performance-JSON-codec.html).
+This benchmark compared [JSON module in Z-Data](https://hackage.haskell.org/package/Z-Data/docs/Z-Data-JSON.html) with [aeson](https://hackage.haskell.org/package/aeson), a widely used JSON package on hackage. See our analysis in [this blog post](/performance/2021/02/01/High-performance-JSON-codec.html).
 
 ![bench-result](https://github.com/ZHaskell/benchmarks/blob/master/json-benchmark/json-benchmark-result.png?raw=true)
 
