@@ -109,7 +109,7 @@ main = do
   where
     loop :: BufferedInput -> Int -> IO Int
     loop input !wc = do
-        -- read a single line without linefeed dropped
+        -- read a single line with linefeed dropped
         line <- readLine input
         case line of
             Just line' ->
