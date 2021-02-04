@@ -26,7 +26,7 @@ To use Z-IO package for example, add following lines to your project's cabal fil
 
 ```
 ...
-    build-depends:          Z-IO  == 0.1.*
+    build-depends:          Z-IO  == 0.5.*
 ```
 
 Now run `cabal build` within your project directory, cabal should be able to download Z-IO dependency automatically. Let's write a simple tcp echo server for example:
