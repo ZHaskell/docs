@@ -57,6 +57,7 @@ The `UVStream` type implements `Input/Output` class from `Z.IO.Buffered`, so tha
 
 ```
 import Data.Word
+import qualified Z.Data.Vector as V
 
 --   uint8 message type  uint16 payload length  message payload
 --  +------------------+----------------------+------------------
@@ -71,7 +72,6 @@ You can manually decode message frames like this:
 ```haskell
 -- import bit operations
 import Data.Bits    (unsafeShiftL, (.|.))
-import qualified Z.Data.Vector as V
 import Z.IO
 
 readMessage :: HasCallStack => BufferedInput -> IO Message
@@ -91,7 +91,6 @@ Or you can use `Parser` from `Z.Data.Parser` module:
 
 ```haskell
 import qualified Z.Data.Parser as P
-import qualified Z.Data.Vector as V
 import Data.Word
 import Z.IO
 
@@ -106,4 +105,23 @@ readMessage :: HasCallStack => BufferedInput -> IO Message
 readMessage = readParser parseMessage
 ```
 
-`readParser` will run `Parser` once a time, parse `Message` out of buffer, and waiting for input automatically. In face Z.Haskell provides many tools to leverage the streaming nature of TCP protocol(and other streaming devices such as IPC and Files). In next section, we will introduce the `BIO`, a more high-level streaming API.
+`readParser` will run `Parser` once a time, parse `Message` out of buffer, and waiting for input automatically. To write a `Message` to TCP socket is similar:
+
+```haskell
+import qualified Z.Data.Builder as B
+import qualified Z.Data.Vector as V
+import Z.IO
+
+writeMessage :: HasCallStack => BufferedOutput -> Message -> IO ()
+writeMessage bo (Message msg_typ payload) = do
+    -- use Builder monad to compose buffer writing functions
+    writeBuilder bo $ do
+        B.encodePrim msg_typ
+        B.encodePrimBE (V.length payload)
+        B.bytes payload
+    -- you may want to add a flush after each message has been written  
+    -- or leave flush to the caller
+    -- flushBuffer bo
+``` 
+
+Z.Haskell provides many tools to deal with the streaming nature of TCP protocol(and many other streaming devices such as IPC and Files). In the next section, we will introduce the `BIO`, a more high-level streaming API.
