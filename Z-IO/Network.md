@@ -5,6 +5,14 @@ title: Network
 nav_order: 2
 ---
 
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+# Client and server
+
 Network is all about sending and receiving data, using Z-IO's network is straightforward:
 
 ```haskell
@@ -52,6 +60,8 @@ startTCPServer :: HasCallStack
                -- and run in a seperated haskell thread
                -> IO
 ```
+
+# Send/receive packet
 
 The `UVStream` type implements `Input/Output` class from `Z.IO.Buffered`, so that you can reuse all the buffered read/write API, for example let's say you have designed a simple framed message protocol:
 
@@ -125,3 +135,26 @@ writeMessage bo (Message msg_typ payload) = do
 ``` 
 
 Z.Haskell provides many tools to deal with the streaming nature of TCP protocol(and many other streaming devices such as IPC and Files). In the next section, we will introduce the `BIO`, a more high-level streaming API.
+
+# UDP
+
+UDP is differet from IPC or TCP in that it's a message protocol rather than a streaming one. There're no `Input/Output` instances for `UDP` type. Instead, Z-IO directly provide message reading & writing functions for UDP:
+
+```haskell
+-- | Initialize a UDP socket.
+initUDP :: UDPConfig -> Resource UDP
+-- | Send a UDP message to target address.
+sendUDP :: HasCallStack => UDP -> SocketAddr -> V.Bytes -> IO ()
+-- | Receive messages from UDP socket, return source address if available, and a `Bool`
+-- to indicate if the message is partial (larger than receive buffer size).
+recvUDP :: HasCallStack => UDPRecvConfig -> UDP -> IO [(Maybe SocketAddr, Bool, V.Bytes)]
+-- | Receive UDP messages within a loop
+recvUDPLoop :: HasCallStack
+            => UDPRecvConfig
+            -> UDP
+            -> ((Maybe SocketAddr, Bool, V.Bytes) -> IO a)
+            -> IO ()
+```
+
+Loop receiving(`recvUDPLoop`) can be faster since it can reuse the receiving buffer internally. Unlike TCP server above, UDP worker function is called on current haskell thread instead of a forked one. If you have heavy computations to do within the worker function, consider using 'forkBa' from `Z.IO.UV.Manager`(a function similar to `forkIO`, but with active thread balancing, or a producer-consumer architecture.
+
