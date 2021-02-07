@@ -51,7 +51,7 @@ initFile :: CBytes
          -> Resource File
 ```
 
-`FileFlag` and `FileMode` are bit constants controlling the file opening behavior, e.g. if we have read or write access, or if a new file will be created if there's none. You can find more constants on hacakge's document. What's interesting here is that `initFile` function return a `Resource File` type instead of `IO File`. `Resource` is defined in `Z.IO.Resource` module, with a function to use it:
+`FileFlag` and `FileMode` are bit constants controlling the file opening behavior, e.g. if we have read or write access, or if a new file will be created if there's none. You can find more constants on hackage's document. What's interesting here is that `initFile` function return a `Resource File` type instead of `IO File`. `Resource` is defined in `Z.IO.Resource` module, with a function to use it:
 
 ```haskell
 withResource :: HasCallStack
