@@ -19,11 +19,22 @@
             .z-feature-box{flex:1; padding: 24px 28px}
             .z-feature-box p{color:#fff;margin: 0 0 4px}
             .z-feature-box h2{color:#fff; margin: 0 0 24px;}
+            .z-aux-nav{padding-left: 60px;}
+            .z-aux-nav:before{
+                content: "";
+                width: 60px;
+                height: 60px;
+                position: absolute;
+                left: 0;
+                top: 0;
+                background-image: url("https://avatars.githubusercontent.com/u/38765559?s=200&v=4");
+                background-size: contain;
+            }
         </style>
     </head>
     <body>
         <nav role="navigation" class="main-header" id="main-header">
-            <div class="aux-nav">
+            <div class="aux-nav z-aux-nav">
                 <a href="/" class="site-button">
                     <span style="font-size:24px;color:#000;">Z</span>
                     <span style="font-size:24px;">.Haskell</span>

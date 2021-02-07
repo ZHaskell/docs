@@ -22,14 +22,14 @@ or use package management on your operating system if available:
 
 ## Installation
 
-To use Z-IO package, for example, add the following lines to your project's cabal file:
+To use Z-Data package, for example, add the following lines to your project's cabal file:
 
 ```
 ...
-    build-depends:          Z-IO == {{site.data.version.z_version}}.*
+    build-depends:          Z-Data == {{site.data.version.z_version}}.*
 ```
 
-Now run `cabal build` within your project directory, cabal should be able to download Z-IO dependency automatically. Let's write a simple TCP echo server for example:
+Now run `cabal build` within your project directory, cabal should be able to download Z-Data dependency automatically. Let's write a simple TCP echo server for example:
 
 1. Initialize a project with `cabal`.
 
@@ -48,7 +48,6 @@ Now run `cabal build` within your project directory, cabal should be able to dow
     ```
     ...
         build-depends:          Z-IO  == {{site.data.version.z_version}}.*
-                                Z-Data == {{site.data.version.z_version}}.*
     ```
 
 3. Edit code.
@@ -77,15 +76,14 @@ Now run `cabal build` within your project directory, cabal should be able to dow
     Resolving dependencies...
     Build profile: -w ghc-{{site.data.version.ghc_version}} -O1
     In order, the following will be built (use -v for more details):
-     - Z-Data-{{site.data.version.z_version}}.0.0 (lib) (requires download & build)
      - Z-IO-{{site.data.version.z_version}}.0.0 (lib) (requires download & build)
      - tcp-echo-0.1.0.0 (exe:tcp-echo) (first run)
-    Downloaded   Z-Data-{{site.data.version.z_version}}.0.0
-    Starting     Z-Data-{{site.data.version.z_version}}.0.0 (lib)
-    Building     Z-Data-{{site.data.version.z_version}}.0.0 (lib)
+    Downloaded   Z-IO-{{site.data.version.z_version}}.0.0
+    Starting     Z-IO-{{site.data.version.z_version}}.0.0 (lib)
+    Building     Z-IO-{{site.data.version.z_version}}.0.0 (lib)
     ...
     ```
 
-    It may take a while for the first time build because cabal needs to download and built all the dependencies, building afterward will be faster after dependencies are cached.
+    It may take a while for the first time build because cabal needs to download and build all the dependencies, building afterward will be faster after dependencies are cached.
 
 Now you can use `cabal run` to run your echo server and `nc 0.0.0.0 8080` to test it, and that's it! happy hacking.
