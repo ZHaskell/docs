@@ -225,14 +225,12 @@ BIO pushA pullA >|> BIO pushB pullB = BIO push_ pull_
 
 ```
 
-This composition's type is interesting:
+This composition's type has some interesting results:
 
-+ The output type of node A must be the same with the input type of node B.
-+ The result `BIO` take A's input type, and B's output type.
 + If you compose a `Source a` to `BIO a b`, you will get a `Source b`.
 + If you compose a `BIO a b` to `Sink a`, you will get a `Sink b`.
 
-So let's you want to count a file content's line number, you can use `BIO` like this:
+So let's say you want to count a file content's line number, you could use `BIO`:
 
 ```haskell
 import Z.IO
