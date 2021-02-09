@@ -86,7 +86,6 @@ withResource (FS.initFile "./test_file" FS.O_RDWR FS.DEFAULT_FILE_MODE) $ \ file
 ```haskell
 class Input i where
     readInput :: HasCallStack => i -> Ptr Word8 -> Int -> IO Int
-
 class Output o where
     writeOutput :: HasCallStack => o -> Ptr Word8 -> Int -> IO ()
 ```
@@ -128,20 +127,25 @@ Here's a quick cheatsheet on buffered IO, `BufferedInput` first:
 ```haskell
 -- | Request a chunk from input device.
 readBuffer :: HasCallStack => BufferedInput -> IO Bytes
+
 -- | Push back an unconsumed chunk
 unReadBuffer :: HasCallStack => Bytes -> BufferedInput -> IO ()
+
 -- | Read exactly N bytes, throw exception if EOF reached before N bytes.
 readExactly :: HasCallStack => Int -> BufferedInput -> IO Bytes
+
 --  /----- readToMagic ----- \ /----- readToMagic -----\ ...
 -- +------------------+-------+-----------------+-------+
 -- |       ...        | magic |       ...       | magic | ...
 -- +------------------+-------+-----------------+-------+
 readToMagic :: HasCallStack => Word8 -> BufferedInput -> IO Bytes
+
 --  /--- readLine ---\ discarded /--- readLine ---\ discarded / ...
 -- +------------------+---------+------------------+---------+
 -- |      ...         | \r\n/\n |       ...        | \r\n/\n | ...
 -- +------------------+---------+------------------+---------+
 readLine :: HasCallStack => BufferedInput -> IO (Maybe Bytes)
+
 -- | Read all chunks from input.
 readAll :: HasCallStack => BufferedInput -> IO [Bytes]
 readAll' :: HasCallStack => BufferedInput -> IO Bytes
@@ -149,6 +153,7 @@ readAll' :: HasCallStack => BufferedInput -> IO Bytes
 -- | See Parser & Builder under Z-Data section for following functions.
 -- | Request input using Parser
 readParser :: HasCallStack => Parser a -> BufferedInput -> IO a
+
 -- | Request input using ParseChunks, see Parser & Builder under Z-Data section.
 readParseChunks :: (Print e, HasCallStack) => ParseChunks IO Bytes e a -> BufferedInput -> IO a
 ```
@@ -168,14 +173,14 @@ flushBuffer :: HasCallStack => BufferedOutput -> IO ()
 
 Other operations from `Z.IO.FileSystem` module, e.g. `seek`, `mkdtemp`, `rmdir`, etc. are basically mirroring unix system call, which should be familiar to people came from C/C++. The type for file path in Z is `CBytes`, which is a `\NUL` terminated byte array managed on GHC heap. 
 
-We assumed that `CBytes`'s content is UTF-8 encoded though it may not always be the case, and there're some platform differeces on file path handling, e.g. the seperator on windows is different from unix. To proper handle file path, use `Z.IO.FileSystem.FilePath` (which is re-exported from `Z.IO.FileSystem`), for example instead of manually connect file path like:
+We assumed that `CBytes`'s content is UTF-8 encoded though it may not always be the case, and there're some platform differeces on file path handling, e.g. the seperator on windows is different from unix. To proper handle file path, use `Z.IO.FileSystem.FilePath` (which is re-exported from `Z.IO.FileSystem`), for example instead of manually connecting file path like:
 
 ```haskell 
 let p = "foo" <> "/" <> "bar" 
 ```
 You should always use library's functions
 
-```
+```haskell
 import qualified Z.IO.FileSystem as FS
 
 let p = "foo" `FS.join` "bar" 

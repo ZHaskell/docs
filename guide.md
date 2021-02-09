@@ -13,23 +13,28 @@ permalink: /guide
 
 ## Requirements
 
-You need a working haskell compiler system: GHC(>={{site.data.version.ghc_version}}), cabal-install(>={{site.data.version.cabal_version}}). You can download pre-built binaries([GHC](https://www.haskell.org/ghc/download.html),
-[cabal-install](https://www.haskell.org/cabal/download.html)) and install manually, 
-or use package management on your operating system if available:
-* Mac users can get them via [homebew](//brew.sh/): `brew install ghc cabal-install`.
-* Windows users can get them via [chocolatey](//chocolatey.org): `choco install ghc cabal`.
-* Ubuntu users are recommended to use this [ppa](//launchpad.net/~hvr/+archive/ubuntu/ghc).
+You need a working Haskell compiler system: GHC(>={{site.data.version.ghc_version}}), cabal-install(>={{site.data.version.cabal_version}}). You have several choices:
+
++ Use the package manager on your operating system if available:
+
+    * Mac users can get them via [homebew](//brew.sh/): `brew install ghc cabal-install`.
+    * Windows users can get them via [chocolatey](//chocolatey.org): `choco install ghc cabal`.
+    * Ubuntu users are recommended to use this [ppa](//launchpad.net/~hvr/+archive/ubuntu/ghc).
+
++ Setup via [ghcup](https://www.haskell.org/ghcup/).
+
++ Download pre-built binaries([GHC](https://www.haskell.org/ghc/download.html), [cabal-install](https://www.haskell.org/cabal/download.html)) and install manually.
 
 ## Installation
 
-To use Z-Data package, for example, add the following lines to your project's cabal file:
+To use [Z-Data](https://hackage.haskell.org/package/Z-Data) package, for example. Add the following lines to your project's cabal file:
 
 ```
 ...
     build-depends:          Z-Data == {{site.data.version.z_version}}.*
 ```
 
-Now run `cabal build` within your project directory, cabal should be able to download Z-Data dependency automatically. Let's write a simple TCP echo server for example:
+Now run `cabal build` within your project directory, cabal should be able to download [Z-Data](https://hackage.haskell.org/package/Z-Data) dependency automatically. Let's write a simple TCP echo server for teaching purpose:
 
 1. Initialize a project with `cabal`.
 
@@ -39,11 +44,11 @@ Now run `cabal build` within your project directory, cabal should be able to dow
     cabal init -i
     ```
 
-    Now, `cabal` will ask you some simple questions about your project, then create a `tcp-echo.cabal` file.
+    `cabal` will ask you some questions about your project, and create a `tcp-echo.cabal` file.
 
 2. Add dependencies.
 
-    Now open the` tcp-echo.cabal` file with a text editor, add the following lines under the `executable` section:
+    Now open the` tcp-echo.cabal` file with a text editor, add following lines under the `executable` section:
 
     ```
     ...
@@ -54,7 +59,7 @@ Now run `cabal build` within your project directory, cabal should be able to dow
 
     Open `src/Main.hs` and add a simple echo TCP server:
 
-    ```
+    ```haskell
     import Control.Monad
     import Z.IO
     import Z.IO.Network
@@ -86,4 +91,4 @@ Now run `cabal build` within your project directory, cabal should be able to dow
 
     It may take a while for the first time build because cabal needs to download and build all the dependencies, building afterward will be faster after dependencies are cached.
 
-Now you can use `cabal run` to run your echo server and `nc 0.0.0.0 8080` to test it, and that's it! happy hacking.
+After building complete, you can use `cabal run` to run your echo server and `nc 0.0.0.0 8080` to test it. That's it, happy hacking!

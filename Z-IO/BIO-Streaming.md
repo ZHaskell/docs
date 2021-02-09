@@ -11,7 +11,7 @@ nav_order: 3
 1. TOC
 {:toc}
 
-# `BIO`: push and pull
+# BIO: push and pull
 
 In previous sections we introduced the `Z.IO.Buffered` module, which gives you buffered reading and writing. Combined with [Buidler and Parser]() facility, It's easy to handle some simple streaming task such as read/write packets from TCP wire. But sometime things could get complicated. Let's say you want to use the [zlib]() library to decompress a bytes stream from file. The interface provided by zlib is like this:
 
@@ -64,33 +64,31 @@ newReChunk n = do
     trailingRef <- newIORef V.empty
     return (BIO (push_ trailingRef) (pull_ trailingRef))
   where
-    -- implement push operation, which can receive new input chunk
+    -- implement push operation, take input chunk, return chunk in multipler of granularity
     push_ trailingRef bs = do
         trailing <- readIORef trailingRef
-        -- there maybe trailing bytes from last chunk
+        -- concat trailing bytes from last chunk first
         let chunk =  trailing `V.append` bs
             l = V.length chunk
         if l >= n
-        then do
-            -- if we have enough bytes, then make a cut
+        then do     -- if we have enough bytes, then make a cut
             let l' = l - (l `rem` n)
                 (chunk', rest) = V.splitAt l' chunk
             writeIORef trailingRef rest
             return (Just chunk')
-        else do
-            -- otherwise we continue waiting for new chunks
+        else do     -- otherwise we continue waiting for new chunks
             writeIORef trailingRef chunk
             return Nothing
 
     -- implement pull operation, which is called after input ended
+    -- here we choose to directly return trailing bytes
+    -- depend on usage, you may throw it away, or add some padding 
     pull_ trailingRef = do
         trailing <- readIORef trailingRef
         if V.null trailing
         then return Nothing
         else do
             writeIORef trailingRef V.empty
-            -- here we choose to directly return trailing bytes
-            -- depend on usage, you may throw it away, or add some padding 
             return (Just trailing)
 ```
 
@@ -99,41 +97,53 @@ Look at `newReChunk`'s implementation, which use `IORef` a.k.a. mutable referenc
 ```haskell
 ...
 rechunk <- newReChunk
-
--- used in one place will mutate rechunk's state
+-- used in one place will mutate rechunk's state(trailing bytes in this case)
 ... rechunk ...
--- so it's not safe to be used in another place
+-- it's unsafe to be used in another place 
 ... rechunk ...
 ```
 
-The `Z.IO.BIO` module provides various `BIO` node types, from UTF-8 decoder to counter node. Most of them are stateful, you have to create a new node each time. Some nodes are not stateful though:
+The `Z.IO.BIO` module provides various `BIO` node types, from UTF-8 decoder to counter node. Most of them are stateful, and you should create a new node each time. Some nodes are not stateful though:
 
 ```haskell
+-- A `hexEncoder` is a pure bytes transform node, thus can be used without initialization.
 hexEncoder :: Bool  -- ^ uppercase?
            -> BIO Bytes Bytes
+hexEncoder upper = pureBIO (hexEncode upper)
+
+-- | BIO node from a pure function.
+pureBIO :: (a -> b) -> BIO a b
+pureBIO f = BIO (\ x -> let !r = f x in return (Just r)) (return Nothing)
 ```
 
-A `hexEncoder True` is a `BIO` node wrap a pure bytes transform function, thus can be used multiple time without initialization.
+# Source and Sink types
 
-# `Source` and `Sink` types
+Now let's consider following devices:
 
-Now we consider following devices:
++ A data source which doesn't take input, but can be read until EOF.
++ A data sink which only perform writing without producing any meaningful result.
 
-+ A data source is a `BIO` node which doesn't take input, but can be read until EOF.
-+ A data sink is a `BIO` node which only perform writing without producing any meaningful result.
-
-Then we can have the definitions for data `Source` and `Sink`s:
+We can have the definitions for data `Source` and `Sink` by using `Void` from `Data.Void`:
 
 ```haskell
--- Void from `Data.Void` is a data type which doesn't have a constructor,
--- data Void
--- `Source` type doesn't need input
+-- Void from is a data type which doesn't have a constructor
+-- Source type doesn't need input
 type Source a = BIO Void a
--- `Sink` type doesn't produce output
+-- Sink type doesn't produce output
 type Sink a = BIO a Void
 ```
 
-Because `Void` type doesn't have constructors, we can't possibly `push` a `Void` to `Source`, one can omit `push` field when defining a `Source`, for example if we want to source element from `[a]` :
+Because `Void` type doesn't have constructors, thus `push` `Source` is impossible, one can only define `pull` field when defining a `Source`:
+
+```
+           +--------------+ 
+ Void --X->|              | 
+           | BIO Void out | pull 
+           |              +-----> Maybe out | Just x : there's a chunk x left inside `Source`
+           +--------------+                 | Nothing: the `Source` reached its EOF
+```
+
+For example a `BIO` node sourcing elements from `[a]` can be implemented like this:
 
 ```haskell
 {-# OPTIONS_GHC -Wno-missing-fields #-}
@@ -142,8 +152,7 @@ Because `Void` type doesn't have constructors, we can't possibly `push` a `Void`
 sourceFromList :: [a] -> IO (Source a)
 sourceFromList xs0 = do
     xsRef <- newIORef xs0
-    -- there's no need to set the push field, since 
-    -- no one could possibly call it
+    -- there's no need to set the push field, since no one could possibly call it
     return BIO{ pull = popper xsRef }
   where
     popper xsRef = do
@@ -155,21 +164,31 @@ sourceFromList xs0 = do
             _ -> return Nothing
 ```
 
+For `type Sink a = BIO a Void`, both `push` and `pull`'s field type is `a -> Maybe Void`, which mean both `push` and `pull` can only return `Nothing`. We deliberately use `pull` for flushing output device in Z:
 
+```
+           +--------------+ 
+           |       +------+-----> Nothing :: Maybe Void
+      push |      /       | push (push input chunk into `Sink`)
+ inp ----->+-----+        | 
+           | BIO inp Void | pull (flush the `Sink`)
+           |              +-----> Nothing :: Maybe Void
+           +--------------+              
+```
 
-# Compose `BIO`s
+# Composing BIO
 
-Now we have a abstract stream transformation type BIO, we can start to consider how to compose these transformations together instead of `pull` from one and `push` to another manually. The composition of two `BIO` node should:
+Now we have the abstract stream transformation type `BIO`, let's start to consider how to compose transformations together instead of `pull` from one and `push` to another manually. The composition of two `BIO` node should:
 
 + Take the first node's input type, yield second node's output.
 + If an input chunk is `push`ed, produced an output chunk if both node could produce output.
 + After input reached EOF, `pull` should consume buffered trailing bytes from both node.
 
-Here is the implementation of such a composition:
+`>|>` from `Z.IO.BIO` is the implementation of such a composition:
 
 ```haskell
                                    Nothing
-                                   +--- ----------------------------+
+                                   +--------------------------------+
            +--------------+       /             +--------------+     \
            |       +------+----->+------------->+--------------+------+----> Maybe outB
       push |      /       | push   Just x  push | BIO inB outB |       push
@@ -188,8 +207,7 @@ BIO pushA pullA >|> BIO pushB pullB = BIO push_ pull_
     push_ inp = do
         -- push to node A first
         x <- pushA inp
-        -- if node A produces output, push to node B
-        -- otherwise hold
+        -- if node A produces output, push to node B, otherwise hold
         case x of Just x' -> pushB x'
                   _       -> return Nothing
     pull_ = do
@@ -199,7 +217,7 @@ BIO pushA pullA >|> BIO pushB pullB = BIO push_ pull_
             -- if node A produces output, push to node B
             Just x' -> do
                 y <- pushB x'
-                -- draw input from A until there's an output from B
+                -- draw input from A in a loop until there's an output from B
                 case y of Nothing -> pull_  
                           _       -> return y
             -- node A reached EOF, pull node B
@@ -207,4 +225,152 @@ BIO pushA pullA >|> BIO pushB pullB = BIO push_ pull_
 
 ```
 
+This composition's type is interesting:
 
++ The output type of node A must be the same with the input type of node B.
++ The result `BIO` take A's input type, and B's output type.
++ If you compose a `Source a` to `BIO a b`, you will get a `Source b`.
++ If you compose a `BIO a b` to `Sink a`, you will get a `Sink b`.
+
+So let's you want to count a file content's line number, you can use `BIO` like this:
+
+```haskell
+import Z.IO
+import Z.Data.PrimRef (readPrimIORef)
+
+main :: IO ()
+main = do
+    _:path:_ <- getArgs
+    withResource (initSourceFromFile path) $ \ fileSource -> do
+        (counterRef, counterNode) <- newCounterNode
+        splitNode <- newLineSplitter
+        _ <- runSource_ $ fileSource >|> splitNode >|> counterNode
+        printStd =<< readPrimIORef counterRef
+```
+
+`runSource_ :: Source a -> IO ()` is a function continuously draw input from a `Source` node until it reaches EOF, it's defined as:
+
+```
+-- | Drain a source without collecting result.
+runSource_ :: Source x -> IO ()
+runSource_ BIO{..} = loop pull
+  where
+    loop f = do
+        r <- f
+        case r of Just _ -> loop f
+                  _      -> return ()
+```
+
+As long as `pull`ing from `Source` return chunks, `runSource_` will not stop. In above example we use this function to drive the whole `BIO` chain, draw chunks from file, feed into line splitter, then the counter. The counter's state is a primitive reference which can be read using functions from `Z.Data.PrimRef`.
+
+If you have a complete `BIO` from `Source` to `Sink`, then you will get a composition node with type `BIO Void Void`, which doesn't have either input or output. You can directly `pull` it to run the whole chain, because when you `pull` the composition node, `>|>` will continuously draw chunks from the left node if the right node output `Nothing`, which is the only possible output if the right node is a `Sink`. Thus we have following function:
+
+```haskell
+runBIO :: BIO Void Void -> IO ()
+runBIO BIO{..} = pull >> return ()
+```
+
+# BIO Cheatsheet
+
+`Z.IO.BIO` provides many functions to construct `Source`, `Sink` and `BIO`s, here's a cheatsheet:
+
++ `Source` and `Sink`
+
+    ```haskell
+    -- source from list
+    sourceFromList                 :: [a] -> IO (Source a)
+    -- source from file
+    initSourceFromFile             :: CBytes -> Resource (Source Bytes)
+    -- source from IO
+    sourceFromIO                   :: IO (Maybe a) -> Source a
+    -- source from `BufferedInput`
+    sourceFromBuffered             :: BufferedInput -> Source Bytes
+    sourceTextFromBuffered         :: BufferedInput -> Source Text
+    sourceJSONFromBuffered         :: JSON a => BufferedInput -> Source a
+    sourceParserFromBuffered       :: Parser a -> BufferedInput -> Source a
+    sourceParseChunksFromBuffered  :: Print e
+                                   => ParseChunks IO Bytes e a -> BufferedInput -> Source a
+    -- sink to list
+    sinkToList                     :: IO (IORef [a], Sink a)
+    -- sink to file
+    initSinkToFile                 :: CBytes -> Resource (Sink Bytes)
+    -- sink to perform IO
+    sinkToIO                       :: (a -> IO ()) -> Sink a
+    -- sink to `BufferedOutput`
+    sinkToBuffered                 :: BufferedOutput -> Sink Bytes
+    sinkBuilderToBuffered          :: BufferedOutput -> Sink (Builder a)
+    ```
++ Built-in `BIO`s
+
+    ```haskell
+    -- | Parse bytes to produce result 
+    newParserNode :: Parser a -> IO (BIO Bytes a)
+    -- | Rechunk chunks to size in multipler of a fixed granularity
+    newReChunk :: Int -> IO (BIO V.Bytes V.Bytes)
+    -- | UTF-8 decoder
+    newUTF8Decoder :: IO (BIO V.Bytes T.Text)
+    -- | Split chunk by magic byte(keep the byte)
+    newMagicSplitter :: Word8 -> IO (BIO V.Bytes V.Bytes)
+    -- | Split chunk by linefeed(drop linefeeds)
+    newLineSplitter :: IO (BIO V.Bytes V.Bytes)
+    -- | Base64 encoder
+    newBase64Encoder :: IO (BIO V.Bytes V.Bytes)
+    -- | Base64 decoder
+    newBase64Decoder :: IO (BIO V.Bytes V.Bytes)
+    -- | Stateless hex encoder
+    hexEncoder :: Bool -> BIO V.Bytes V.Bytes
+    -- | Hex decoder
+    newHexDecoder :: IO (BIO V.Bytes V.Bytes)
+    -- | Count input elements number
+    newCounterNode :: IO (Counter, BIO a a)
+    -- | Label input elements with a sequence number
+    newSeqNumNode :: IO (Counter, BIO a (Int, a))
+    -- | Grouping input elements into fixed size arrays
+    newGroupingNode :: Int -> IO (BIO a (A.SmallArray a))
+    ```
+
++ Composition
+
+    ```haskell
+    -- | Connect two 'BIO' nodes, feed left one's output to right one's input.
+    (>|>) :: BIO a b -> BIO b c -> BIO a c
+    -- | Map a function to BIO's output elements.
+    (>~>) :: BIO a b -> (b -> c) -> BIO a c
+    -- | Connect BIO to an effectful function.
+    (>!>) :: BIO a b -> (b -> IO c) -> BIO a c
+    -- | Connect two 'BIO' source, after first reach EOF, draw element from second.
+    appendSource :: Source a -> Source a  -> IO (Source a)
+    -- | Connect list of 'BIO' sources, after one reach EOF, draw element from next.
+    concatSource :: [Source a] -> IO (Source a)
+    -- | Zip two 'BIO' source into one, reach EOF when either one reached EOF.
+    zipSource :: Source a -> Source b -> IO (Source (a,b))
+    -- | Zip two 'BIO' nodes into one, reach EOF when either one reached EOF.
+    zipBIO :: BIO a b -> BIO a c -> IO (BIO a (b, c))
+    -- | Write to both left and right sink.
+    joinSink :: Sink out -> Sink out -> Sink out
+    -- | Write to a list of sinks.
+    fuseSink :: [Sink out] -> Sink out
+    ```
+
++ Execution
+
+    ```haskell
+    -- | Run a 'BIO' chain from source to sink.
+    runBIO :: BIO Void Void -> IO ()
+    -- | Drain a 'BIO' source into a List in memory.
+    runSource :: Source x -> IO [x]
+    -- | Drain a source without collecting result.
+    runSource_ :: Source x -> IO ()
+    -- | Supply a single block of input, then run BIO node until EOF.
+    runBlock :: BIO inp out -> inp -> IO [out]
+    -- | Supply a single block of input, then run BIO node until EOF with collecting result.
+    runBlock_ :: BIO inp out -> inp -> IO ()
+    -- | Wrap 'runBlocks' into a pure interface.
+    unsafeRunBlock :: IO (BIO inp out) -> inp -> [out]
+    -- | Supply blocks of input, then run BIO node until EOF.
+    runBlocks :: BIO inp out -> [inp] -> IO [out]
+    -- | Supply blocks of input, then run BIO node until EOF with collecting result.
+    runBlocks_ :: BIO inp out -> [inp] -> IO ()
+    -- | Wrap 'runBlocks' into a pure interface.
+    unsafeRunBlocks :: IO (BIO inp out) -> [inp] -> [out]
+    ```
