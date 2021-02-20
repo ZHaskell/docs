@@ -130,7 +130,7 @@ Are represented as:
              I# (Int's constructor)
 ```
 
-During runtime the value `foo` is a reference, and all the operations, e.g. pattern match, is going through dereferencing. Values like this are called *boxed* because it's a reference to a box, i.e. heap objects with [info-table](https://gitlab.haskell.org/ghc/ghc/-/wikis/commentary/rts/storage/heap-objects#info-tables). The info-table contains many useful infomation about the box, such as how many words the boxed occupied, which constructor the box stand for, etc.
+During runtime the value `foo` is a reference, and all the operations, e.g. pattern match, go through dereferencing. Values like this are called *boxed* because it's a reference to a box, i.e. heap objects with [info-table](https://gitlab.haskell.org/ghc/ghc/-/wikis/commentary/rts/storage/heap-objects#info-tables). The info-table contains many useful infomation about the box, such as how many words the boxed occupied, which constructor the box stand for, etc.
 
 The `3#` and `'a'#` above are haskell's non-pointer value, we call values like this *unboxed* values. Unboxed values don't have info-tables, so we really can't have them directly on heap: otherwise the GC would get confused when it scans them: without infomation from info-table, it can't decide how many bytes to copy. These values are usually belong to registers or other boxes: we generate machine code to manipulate them directly.
 
@@ -227,5 +227,5 @@ To efficiently store boxed unlifted types, `Unlifted` class and `UnliftedArray` 
 
 # More on arrays
 
-There're more details on Haskell arrays, such as pinned vs unpinned `ByteArray`s, etc. Interestring readers could find all these details on [GHC wiki](https://gitlab.haskell.org/ghc/ghc/-/wikis/home), especially on RTS section.
+There're more details on Haskell arrays, such as pinned vs unpinned `ByteArray`s, etc. Interested readers could find all these details on [GHC wiki](https://gitlab.haskell.org/ghc/ghc/-/wikis/home), especially on RTS section.
 To use array proper, all you need to do is choose the proper storage type and import `Z.Data.Array`. In next section we will introduce vectors, which is simply slices of arrays.
