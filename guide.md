@@ -89,6 +89,6 @@ Now run `cabal build` within your project directory, cabal should be able to dow
     ...
     ```
 
-    It may take a while for the first time build because cabal needs to download and build all the dependencies, building afterward will be faster after dependencies are cached.
+    It may take a while for the first time build because cabal needs to download and build all the dependencies, building afterward will be faster after dependencies are cached. For reference, on an intel 4th gen core, it takes around 10mins to compile Z-Data and Z-IO. So seat back and relax, or go for a coffee.
 
 After building complete, you can use `cabal run` to run your echo server and `nc 0.0.0.0 8080` to test it. That's it, happy hacking!
