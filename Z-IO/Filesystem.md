@@ -28,7 +28,7 @@ writeFile :: HasCallStack => CBytes -> Bytes -> IO ()
 writeTextFile :: HasCallStack => CBytes -> Text -> IO ()
 ```
 
-`CBytes` is Z's file path type, `Bytes`, `Text` are binary and textual content type respectively, which all be document in Z-Data section. For now, all you need to know is Z-IO assumes UTF-8 encoding everywhere: both filepath and text content are assumed using UTF-8 encoding. 
+`CBytes` is Z's file path type. `Bytes`, and `Text` are types for binary and textual content, respectively. And these are all documented in Z-Data section. For now, all you need to know is Z-IO assumes UTF-8 encoding everywhere: both filepath and text content can be assumed this way. 
 
 
 ```haskell
@@ -51,7 +51,7 @@ initFile :: CBytes
          -> Resource File
 ```
 
-`FileFlag` and `FileMode` are bit constants controlling the file opening behavior, e.g. if we have read or write access, or if a new file will be created if there's none. You can find more constants on hackage's document. What's interesting here is that `initFile` function return a `Resource File` type instead of `IO File`. `Resource` is defined in `Z.IO.Resource` module, with a function to use it:
+`FileFlag` and `FileMode` are bit constants controlling the file opening behavior, such as if we have read or write access or if a new file will be created when there's none. You can find more constants on hackage. The interesting thing here is that `initFile` function returns a `Resource File` type instead of `IO File`. `Resource` is defined in `Z.IO.Resource` module, with a function to use it:
 
 ```haskell
 withResource :: HasCallStack
@@ -66,7 +66,7 @@ withResource' :: HasCallStack
               -> IO b
 ```
 
-We simplified those two functions' type a little bit, and here is the idea: `withResource` will take care about resource opening and cleanup automatically, after you finish using it, or when exception happens. You only need to pass a function working on that resource. Now let's read the file created above again:
+We simplified those two functions' type a little bit, and here is the idea: `withResource` will take care of resource opening and cleanup automatically, after you finish using it, or when exceptions happen. You only need to pass a function working on that resource. Now let's read the file created above again:
 
 ```haskell
 import           Z.IO       -- this module re-export Z.IO.Resource and other common stuff
@@ -77,11 +77,11 @@ withResource (FS.initFile "./test_file" FS.O_RDWR FS.DEFAULT_FILE_MODE) $ \ file
     printStd =<< readLine bi
 ```
 
-`initFile` function doesn't open the file, it just record how to open and close the file. Everytime you want to do something about the file, use `withResource` to open(and close) it, and that's all about resource handling in Z.
+`initFile` function doesn't open the file, and it just records how to open and close the file. Every time you want to do something with the file, use `withResource` to open(and close) it, and that's all about resource handling in Z.
 
 # Buffered I/O
 
-`newBufferedInput` and `readLine` functions in the code above are from `Z.IO.Buffered` module(also re-exported from `Z.IO`). In Z-IO, many IO devices(including `File` above) are instances to `Input/Output` class:
+`newBufferedInput` and `readLine` functions in the code above are from `Z.IO.Buffered` module(also re-exported from `Z.IO`). In Z-IO, many IO devices(including `File` above) are instances of `Input/Output` class:
 
 ```haskell
 class Input i where
@@ -90,14 +90,14 @@ class Output o where
     writeOutput :: HasCallStack => o -> Ptr Word8 -> Int -> IO ()
 ```
 
-`readInput` and `writeOutput` works on pointers, which is not very convenient for directly usage. Open a `BufferedInput` or `BufferedOutput` to get auto managed buffered I/O:
+`readInput` and `writeOutput` work on pointers, which is not very convenient for direct usage. Open a `BufferedInput` or `BufferedOutput` to get auto-managed buffered I/O:
 
 ```haskell
 newBufferedInput :: Input i => i -> IO BufferedInput
 newBufferedOutput :: Output o => o -> IO BufferedOutput
 ```
 
-There's a set of functions working on `BufferedInput/BufferedOutput` in `Z.IO.Buffered`, for example to implement a word counter for files:
+There's a set of functions working on `BufferedInput/BufferedOutput` in `Z.IO.Buffered`, for example, to implement a word counter for files:
 
 ```haskell
 import           Z.IO       
@@ -125,7 +125,7 @@ main = do
 Here's a quick cheatsheet on buffered IO, `BufferedInput` first:
 
 ```haskell
--- | Request a chunk from input device.
+-- | Request a chunk from the input device.
 readBuffer :: HasCallStack => BufferedInput -> IO Bytes
 
 -- | Push back an unconsumed chunk
@@ -150,7 +150,7 @@ readLine :: HasCallStack => BufferedInput -> IO (Maybe Bytes)
 readAll :: HasCallStack => BufferedInput -> IO [Bytes]
 readAll' :: HasCallStack => BufferedInput -> IO Bytes
 
--- | See Parser & Builder under Z-Data section for following functions.
+-- | See Parser & Builder under Z-Data section for the following functions.
 -- | Request input using Parser
 readParser :: HasCallStack => Parser a -> BufferedInput -> IO a
 
@@ -169,16 +169,16 @@ writeBuilder :: HasCallStack => BufferedOutput -> Builder a -> IO ()
 flushBuffer :: HasCallStack => BufferedOutput -> IO ()
 ```
 
-# A note on file path
+# A note on filepath
 
-Other operations from `Z.IO.FileSystem` module, e.g. `seek`, `mkdtemp`, `rmdir`, etc. are basically mirroring unix system call, which should be familiar to people came from C/C++. The type for file path in Z is `CBytes`, which is a `\NUL` terminated byte array managed on GHC heap. 
+Other operations from `Z.IO.FileSystem` module, e.g., `seek`, `mkdtemp`, `rmdir`, etc., are basically mirroring the Unix system call, which should be familiar to people who come from C/C++. The type for file path in Z is `CBytes`, which is a `\NUL` terminated byte array managed on GHC heap. 
 
-We assumed that `CBytes`'s content is UTF-8 encoded though it may not always be the case, and there're some platform differeces on file path handling, e.g. the seperator on windows is different from unix. To proper handle file path, use `Z.IO.FileSystem.FilePath` (which is re-exported from `Z.IO.FileSystem`), for example instead of manually connecting file path like:
+We assumed that `CBytes`'s content is UTF-8 encoded though it may not always be the case, and there're some platform differences on file path handling, e.g., the separator on windows is different from Unix. To proper handle file path, use `Z.IO.FileSystem.FilePath` (which is re-exported from `Z.IO.FileSystem`), for example, instead of manually connecting file path like:
 
 ```haskell 
 let p = "foo" <> "/" <> "bar" 
 ```
-You should always use library's functions
+You should always use functions from the library
 
 ```haskell
 import qualified Z.IO.FileSystem as FS
