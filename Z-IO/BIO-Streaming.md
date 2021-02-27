@@ -13,7 +13,7 @@ nav_order: 3
 
 # BIO: push and pull
 
-In previous sections we introduced the `Z.IO.Buffered` module, which gives you buffered reading and writing. Combined with [Buidler and Parser]() facility, It's easy to handle some simple streaming task such as read/write packets from TCP wire. But sometime things could get complicated. Let's say you want to use the [zlib]() library to decompress a bytes stream from file. The interface provided by zlib is like this:
+In previous sections, we have introduced the `Z.IO.Buffered` module. And it provides APIs for buffered reading and writing. When combined with [Builder and Parser]() facility, it is easy to handle some simple streaming tasks, for example, read/write packets from TCP wire. But sometimes, things could get complicated. Let's say you want to use the [zlib]() library to decompress a bytes stream from some file. The interface provided by zlib is like this:
 
 ```c
 int inflateInit (z_streamp strm, int level);
@@ -21,9 +21,9 @@ int inflate (z_streamp strm, int flush);
 int inflateEnd (z_streamp strm);
 ```
 
-It's OK to draw a chunk from `BufferedInput` and feed it to `z_streamp`, check the status and do computation if a decompressed chunk is produced. But how to read a line from decompressed streams? We can't reuse `readLine` from `Z.IO.Buffered` since decompressed chunks are not directly drawed from `BufferedInput`.
+It's OK to draw a chunk from `BufferedInput`, feed it to `z_streamp`, check the status and do some computation if a decompressed chunk is produced. But how to read a line from decompressed streams? We can't reuse `readLine` from `Z.IO.Buffered` since decompressed chunks are not drawn directly from `BufferedInput`.
 
-Ideally we should have a composable `BufferedInput` type, which can accept some transformations and yield another ` `BufferedInput`. But `BufferedInput` is all about managing reading buffer so that raw bytes chunks can be drawed from device. In Z-IO the `BIO` type is introduced to solve the composable streaming problem:
+Ideally, we should have a composable `BufferedInput` type, which can accept some transformations and yield another `BufferedInput`. But `BufferedInput` is all about managing reading from buffer so that raw byte chunks can be drawn from the device. In Z-IO the `BIO` type is introduced to solve the composable streaming problem:
 
 ```haskell
 data BIO inp out = BIO
@@ -46,11 +46,11 @@ Conceptually a `BIO` is a box doing data transformation:
 
 Let's take zlib's `z_streamp` as an example:
 
-+ A `z_streamp` struct could be `push`ed with an input chunk using `inflate`, possibly produced an output chunk. 
++ A `z_streamp` struct could be `push`ed with an input chunk using `inflate`, possibly producing an output chunk. 
 + If input reached EOF, use `inflateEnd` to `pull` the trailing compressed bytes buffered inside `z_streamp` struct.
 
 
-Another `BIO` example is a rechunk node, which would divide input chunks into chunks with fixed granularity(or multipler of the fixed granularity). This is often useful in data encryption/decryption. Following code is an implementation of such a node:
+Another `BIO` example is a rechunk node, which would divide input chunks into chunks with fixed granularity(or multipliers of the fixed granularity). This is often useful in data encryption/decryption. Following code is an implementation of such a node:
 
 ```haskell
 import Data.IORef
@@ -64,7 +64,7 @@ newReChunk n = do
     trailingRef <- newIORef V.empty
     return (BIO (push_ trailingRef) (pull_ trailingRef))
   where
-    -- implement push operation, take input chunk, return chunk in multipler of granularity
+    -- implement push operation, take input chunk, return chunk in multiplier of granularity
     push_ trailingRef bs = do
         trailing <- readIORef trailingRef
         -- concat trailing bytes from last chunk first
@@ -81,8 +81,8 @@ newReChunk n = do
             return Nothing
 
     -- implement pull operation, which is called after input ended
-    -- here we choose to directly return trailing bytes
-    -- depend on usage, you may throw it away, or add some padding 
+    -- here we choose to return trailing bytes directly
+    -- depending on usage, you may throw it away or add some padding 
     pull_ trailingRef = do
         trailing <- readIORef trailingRef
         if V.null trailing
@@ -92,7 +92,7 @@ newReChunk n = do
             return (Just trailing)
 ```
 
-Look at `newReChunk`'s implementation, which use `IORef` a.k.a. mutable reference in IO, It's clear that this `BIO` carry its state inside IO monad, in a way similar to `IORef` or `z_streamp` above. So it can't be used like immutable data structures:
+Look at `newReChunk`'s implementation, which uses `IORef` a.k.a. mutable reference in IO. It's clear that this `BIO` carries its state inside IO monad, in a way similar to `IORef` or `z_streamp` above. So it can't be used like immutable data structures:
 
 ```haskell
 ...
@@ -118,10 +118,10 @@ pureBIO f = BIO (\ x -> let !r = f x in return (Just r)) (return Nothing)
 
 # Source and Sink types
 
-Now let's consider following devices:
+Now let's consider the following devices:
 
-+ A data source which doesn't take input, but can be read until EOF.
-+ A data sink which only perform writing without producing any meaningful result.
++ A data source which doesn't take any input but can be read until EOF.
++ A data sink which only performs writing without producing any meaningful result.
 
 We can have the definitions for data `Source` and `Sink` by using `Void` from `Data.Void`:
 
@@ -143,7 +143,7 @@ Because `Void` type doesn't have constructors, thus `push` `Source` is impossibl
            +--------------+                 | Nothing: the `Source` reached its EOF
 ```
 
-For example a `BIO` node sourcing elements from `[a]` can be implemented like this:
+For example, a `BIO` node sourcing elements from `[a]` can be implemented like this:
 
 ```haskell
 {-# OPTIONS_GHC -Wno-missing-fields #-}
@@ -164,7 +164,7 @@ sourceFromList xs0 = do
             _ -> return Nothing
 ```
 
-For `type Sink a = BIO a Void`, both `push` and `pull`'s field type is `a -> Maybe Void`, which mean both `push` and `pull` can only return `Nothing`. We deliberately use `pull` for flushing output device in Z:
+For `type Sink a = BIO a Void`, both `push` and `pull`'s field type is `a -> Maybe Void`, which means both `push` and `pull` can only return `Nothing`. We deliberately use `pull` for flushing output device in Z:
 
 ```
            +--------------+ 
@@ -199,7 +199,7 @@ Now we have the abstract stream transformation type `BIO`, let's start to consid
                                    +--------------------------------+
                                    Nothing
 
--- | Connect two 'BIO' nodes, feed left one's output to right one's input.
+-- | Connect two 'BIO' nodes, feed the output from left to right.
 (>|>) :: BIO a b -> BIO b c -> BIO a c
 {-# INLINE (>|>) #-}
 BIO pushA pullA >|> BIO pushB pullB = BIO push_ pull_
@@ -230,7 +230,7 @@ This composition's type has some interesting results:
 + If you compose a `Source a` to `BIO a b`, you will get a `Source b`.
 + If you compose a `BIO a b` to `Sink a`, you will get a `Sink b`.
 
-So let's say you want to count a file content's line number, you could use `BIO`:
+So let's say you want to count the line number of a file, you could use `BIO`:
 
 ```haskell
 import Z.IO
@@ -259,9 +259,9 @@ runSource_ BIO{..} = loop pull
                   _      -> return ()
 ```
 
-As long as `pull`ing from `Source` return chunks, `runSource_` will not stop. In above example we use this function to drive the whole `BIO` chain, draw chunks from file, feed into line splitter, then the counter. The counter's state is a primitive reference which can be read using functions from `Z.Data.PrimRef`.
+As long as `pull`ing from `Source` returns chunks, `runSource_` will not stop. In the example above, we use this function to drive the whole `BIO` chain, draw chunks from the file and feed into the line splitter and then the counter. The counter state is a primitive reference that can be read using functions from `Z.Data.PrimRef`.
 
-If you have a complete `BIO` from `Source` to `Sink`, then you will get a composition node with type `BIO Void Void`, which doesn't have either input or output. You can directly `pull` it to run the whole chain, because when you `pull` the composition node, `>|>` will continuously draw chunks from the left node if the right node output `Nothing`, which is the only possible output if the right node is a `Sink`. Thus we have following function:
+If you have a complete `BIO` from `Source` to `Sink`, you will get a composition node with type `BIO Void Void`, which doesn't have any input or output. You can directly `pull` it to run the whole chain because when you `pull` the composition node, `>|>` will continuously draw chunks from the left node if the right node outputs `Nothing`. And it is the only possible output if the right node is a `Sink`. Thus we have the following function:
 
 ```haskell
 runBIO :: BIO Void Void -> IO ()
@@ -270,7 +270,7 @@ runBIO BIO{..} = pull >> return ()
 
 # BIO Cheatsheet
 
-`Z.IO.BIO` provides many functions to construct `Source`, `Sink` and `BIO`s, here's a cheatsheet:
+`Z.IO.BIO` provides many functions to construct `Source`, `Sink` and `BIO`s. Here's a cheatsheet:
 
 + `Source` and `Sink`
 

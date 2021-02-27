@@ -13,7 +13,7 @@ permalink: /guide
 
 ## Requirements
 
-You need a working Haskell compiler system: GHC(>={{site.data.version.ghc_version}}), cabal-install(>={{site.data.version.cabal_version}}). You have several choices:
+You need a working Haskell compiler system: GHC(>={{site.data.version.ghc_version}}), cabal-install(>={{site.data.version.cabal_version}}). There are several choices:
 
 + Use the package manager on your operating system if available:
 
@@ -27,14 +27,14 @@ You need a working Haskell compiler system: GHC(>={{site.data.version.ghc_versio
 
 ## Installation
 
-To use [Z-Data](https://hackage.haskell.org/package/Z-Data) package, for example. Add the following lines to your project's cabal file:
+To use [Z-Data](https://hackage.haskell.org/package/Z-Data) package as an example. Add the following lines to your project's cabal file:
 
 ```
 ...
     build-depends:          Z-Data == {{site.data.version.z_version}}.*
 ```
 
-Now run `cabal build` within your project directory, cabal should be able to download [Z-Data](https://hackage.haskell.org/package/Z-Data) dependency automatically. Let's write a simple TCP echo server for teaching purpose:
+Now run `cabal build` within your project directory, cabal should be able to download [Z-Data](https://hackage.haskell.org/package/Z-Data) dependency automatically. Let's write a simple TCP echo server just for teaching purpose:
 
 1. Initialize a project with `cabal`.
 
@@ -44,11 +44,11 @@ Now run `cabal build` within your project directory, cabal should be able to dow
     cabal init -i
     ```
 
-    `cabal` will ask you some questions about your project, and create a `tcp-echo.cabal` file.
+    `cabal` will ask you some questions about your project and create a `tcp-echo.cabal` file.
 
 2. Add dependencies.
 
-    Now open the` tcp-echo.cabal` file with a text editor, add following lines under the `executable` section:
+    Now open the` tcp-echo.cabal` file with a text editor, and add the following lines under the `executable` section:
 
     ```
     ...
@@ -75,7 +75,7 @@ Now run `cabal build` within your project directory, cabal should be able to dow
 
 4. Build!
 
-    Make sure you have run `cabal update` to get the latest packages' index, then `cabal build` will start to download dependencies and build your project, you may see output like this:
+    Ensure that you have run `cabal update` to get the latest package list. `cabal build` will start to download dependencies and build your project. You may see output like this:
 
     ```
     Resolving dependencies...
@@ -89,6 +89,6 @@ Now run `cabal build` within your project directory, cabal should be able to dow
     ...
     ```
 
-    It may take a while for the first time build because cabal needs to download and build all the dependencies, building afterward will be faster after dependencies are cached. For reference, on an intel 4th gen core, it takes around 10mins to compile Z-Data and Z-IO. So seat back and relax, or go for a coffee.
+    It may take a while to build for the first time because cabal needs to download and build all the dependencies. Build afterward will be faster since dependencies are cached. For reference, on an intel 4th gen core, it takes around 10mins to compile Z-Data and Z-IO. So sit back and relax, or go for a coffee.
 
 After building complete, you can use `cabal run` to run your echo server and `nc 0.0.0.0 8080` to test it. That's it, happy hacking!
