@@ -13,7 +13,7 @@ nav_order: 2
 
 # Client and server
 
-Network is all about sending and receiving data, using Z-IO's network is straightforward:
+The Network is all about sending and receiving data. Using Z-IO's Network is straightforward:
 
 ```haskell
 import Z.IO
@@ -42,14 +42,14 @@ main = do
 
 Z.Haskell provide several network capabilities:
 
-+ `Z.IO.Network.IPC` provides stream channel for inter-process communication based on domain socket(unix) or named pipe(windows). 
-+ `Z.IO.Network.TCP` provides stream channel for remote communication based on TCP socket.
-+ `Z.IO.Network.UDP` provides message channel on top of UDP socket.
++ `Z.IO.Network.IPC` provides the stream channel for inter-process communication based on domain socket(Unix) or named pipe(Windows). 
++ `Z.IO.Network.TCP` provides the stream channel for remote communication based on TCP socket.
++ `Z.IO.Network.UDP` provides the message channel on top of the UDP socket.
 + A TLS implementation based on [botan](https://botan.randombit.net/) is under development.
 
-Let's take TCP module as an example, lots of low-level socket details(`bind`, `listen`, `accept`, etc.) are hidden, with two high-level operations left:
+Let's take TCP module as an example. Lots of low-level socket details(`bind`, `listen`, `accept`, etc.) are hidden, with two high-level operations left:
 
-```
+```haskell
 -- | Connect to a TCP target
 initTCPClient :: HasCallStack => TCPClientConfig -> Resource UVStream
 -- | Start a TCP server
@@ -63,7 +63,7 @@ startTCPServer :: HasCallStack
 
 # Send/receive packet
 
-The `UVStream` type implements `Input/Output` class from `Z.IO.Buffered`, so that you can reuse all the buffered read/write API, for example let's say you have designed a simple framed message protocol:
+The `UVStream` type implements the `Input/Output` class from `Z.IO.Buffered`, so that you can reuse all the buffered read/write API. For example, let's say you have designed a simple framed message protocol:
 
 ```
 import Data.Word
@@ -115,7 +115,7 @@ readMessage :: HasCallStack => BufferedInput -> IO Message
 readMessage = readParser parseMessage
 ```
 
-`readParser` will run `Parser` once a time, parse `Message` out of buffer, and waiting for input automatically. To write a `Message` to TCP socket is similar:
+`readParser` will run `Parser` once a time, parse `Message` out of the buffer, and waiting for input automatically. To write a `Message` to the TCP socket is similar:
 
 ```haskell
 import qualified Z.Data.Builder as B
@@ -134,11 +134,11 @@ writeMessage bo (Message msg_typ payload) = do
     -- flushBuffer bo
 ``` 
 
-Z.Haskell provides many tools to deal with the streaming nature of TCP protocol(and many other streaming devices such as IPC and Files). In the next section, we will introduce the `BIO`, a more high-level streaming API.
+Z.Haskell provides many tools to deal with the streaming nature of TCP protocol (and many other streaming devices such as IPC and Files). In the next section, we will introduce the `BIO`, a more high-level streaming API.
 
 # UDP
 
-UDP is differet from IPC or TCP in that it's a message protocol rather than a streaming one. There're no `Input/Output` instances for `UDP` type. Instead, Z-IO directly provide message reading & writing functions for UDP:
+UDP is different from IPC or TCP in that it's a message protocol rather than a streaming one. There are no `Input/Output` instances for the `UDP` type. Instead, Z-IO provides message reading & writing functions for UDP directly:
 
 ```haskell
 -- | Initialize a UDP socket.
@@ -156,5 +156,4 @@ recvUDPLoop :: HasCallStack
             -> IO ()
 ```
 
-Loop receiving(`recvUDPLoop`) can be faster since it can reuse the receiving buffer internally. Unlike TCP server above, UDP worker function is called on current haskell thread instead of a forked one. If you have heavy computations to do within the worker function, consider using 'forkBa' from `Z.IO.UV.Manager`(a function similar to `forkIO`, but with active thread balancing, or a producer-consumer architecture.
-
+Loop receiving(`recvUDPLoop`) can be faster since it can reuse the receiving buffer internally. Unlike the TCP server above, the UDP worker function is called on the current Haskell thread instead of a forked one. If you have heavy computations within the worker function, consider using `forkBa` from `Z.IO.UV.Manager` (a function similar to `forkIO`, but with active thread balancing or a producer-consumer architecture).
