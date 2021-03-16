@@ -16,8 +16,10 @@ nav_order: 2
 The Network is all about sending and receiving data. Using Z-IO's Network is straightforward:
 
 ```haskell
+{-# LANGUAGE OverloadedStrings #-}
 import Z.IO
 import Z.IO.Network
+import Z.Data.Text as T
 
 main :: IO ()
 main = do
