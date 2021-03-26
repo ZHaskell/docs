@@ -8,7 +8,7 @@ categories: performance
 
 JSON processing is a fundamental building block in modern network applications. It's also a large module in [Z-Data](//hackage.haskell.org/package/Z-Data) package. With careful optimization, we managed to get a 1.5X - 3X encoding and 3X decoding performance boost comparing to [aeson](//hackage.haskell.org/package/aeson), a widely used JSON package on hackage.
  
- <!--more-->
+<!--more-->
 
 ## Benchmark Result
 

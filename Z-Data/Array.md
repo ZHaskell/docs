@@ -1,11 +1,11 @@
 ---
 layout: default
 parent: Z-Data
-title: Vector and Array
+title: Array
 nav_order: 1
 ---
 
-# Array
+# Array in Haskell
 
 Unlike the ubiquitous linked list type `[a]`. In Haskell arrays doesn't have any built-in syntax support, or any other special compiler support expects some built-in primitive functions, which can be found in [ghc-prim](http://hackage.haskell.org/package/ghc-prim/docs/GHC-Prim.html):
 
@@ -19,7 +19,7 @@ indexInt16Array# :: ByteArray# -> Int# -> Int#
 ...
 ```
 
-It's hard to directly use those functions because they directly manipulate `State#` token, and they distinguish different array types: boxed `Array#`, `ByteArray#`, etc.
+It's hard to directly use those functions because they directly manipulate `State#` token, and they distinguish different array types: boxed `Array#`, `ByteArray#`, etc. The `#` after those types imply they are special primitive types, which will be discussed later.
 
 In [Z-Data](https://hackage.haskell.org/package/Z-Data)，we provide type wrappers and typeclass to unified array operations:
 
@@ -100,6 +100,8 @@ instance PrimUnlifted a => Arr UnliftedArray a where
     ...
 ```
 
+If you know how `IO` works in Haskell, `PrimMonad` simply means `ST` or `IO`. But if you get confused by the `PrimMonad` constraint, please get [more details here](https://wiki.haskell.org/IO_inside).
+
 # Boxed, Unboxed
 
 For many haskellers, using arrays may be the first time one wants to know what's the difference between boxed, unboxed types. It's important to spend some time explaining these buzzwords.
@@ -153,7 +155,7 @@ Now let's consider GHC arrays, they're special heap objects provided by RTS. We 
                                                       are lazy on its element
 ```
 
-It looks quite complicated, especially the card-table part, which is used to [optimize the GC for arrays](https://gitlab.haskell.org/ghc/ghc/-/wikis/commentary/rts/storage/gc/remembered-sets). `MutableArray#`s are always kept in a generation's mutable list once it's promoted to that generation, so this optimizations are important if you keep a large mutable array on heap for a long time. For small arrays, it's unnecessary to use a card-table, and GHC provides `MutableSmallArray#/SmallArray#` for that purpose.
+It looks quite complicated, especially the card-table part, which is used to [optimize the GC for arrays](https://gitlab.haskell.org/ghc/ghc/-/wikis/commentary/rts/storage/gc/remembered-sets). `MutableArray#`s are always kept in a generation's mutable list once it's promoted to that generation, so this optimization is important if you keep a large mutable array on heap for a long time. For small arrays, it's unnecessary to use a card-table, and GHC provides `MutableSmallArray#/SmallArray#` for that purpose.
 
 ```
 +-------------+--------------+---+-...-+---+---+
@@ -177,7 +179,7 @@ A common pattern in Haskell is to turn `MutableArray` into an `Array` with freez
 
 ## Unboxed array
 
-`MutableByteArray#`, `ByteArray#` are GHC's unboxed array. They don't contain pointers, and need not to be traced during GC:
+`MutableByteArray#`, `ByteArray#` are GHC's unboxed array. They don't contain pointers, and their payload do not need to be traced during GC:
 
 ```
 +-------------+--------------+-------------+---+-...-+---+---+
