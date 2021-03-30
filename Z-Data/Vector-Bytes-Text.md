@@ -5,6 +5,12 @@ title: Vector and Text
 nav_order: 2
 ---
 
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
 # Vector: array slices
 
 In Haskell, we use immutable arrays a lot. And we have many array slices types:
@@ -86,11 +92,22 @@ One of the most commonly used vector types is `type Bytes = PrimVector Word8`, w
 
 ```haskell
 > import qualified Z.Data.Vector as V
+> :set -XOverloadedStrings
 > "hello, world" :: V.Bytes
 "hello, world"
+> "你好世界" :: V.Bytes     -- unicode literals will be get choped!
+"`}\SYNL"
 ```
 
-Note that `Bytes` has a different `Show` instances from other `PrimVector` types using `INCOHERENT` instance feature. In `Z-Data` we use this feature to handle `Bytes`'s JSON instance as well(using base64 encoding). You can use functions from `Z.Data.Vector.Hex` and `Z.Data.Vector.Base64` to manually encode binary `Bytes` into ASCII strings:
+In the above example, unicode literals "你好世界" do not produce UTF-8 encoded byte vector as one might expect, you have to use `Text` to get that behaviour:
+
+```haskell
+> import qualified Z.Data.Text as T
+> T.getUTF8Bytes "你好世界" 
+"\228\189\160\229\165\189\228\184\150\231\149\140"
+```
+
+Note that `Bytes`'s `Show` instance is not specialized to show ASCII characters. You can use functions from `Z.Data.Vector.Hex` and `Z.Data.Vector.Base64` to manually encode binary `Bytes` into ASCII strings:
 
 ```haskell
 > import Z.Data.Vector.Hex
@@ -101,11 +118,25 @@ Note that `Bytes` has a different `Show` instances from other `PrimVector` types
 "aGVsbG8gd29scmQ="
 ```
 
+In `Z-Data` we use incoherent instance to handle `Bytes`'s JSON instance(using base64 encoding):
+
+```haskell
+> V.pack [0..127] :: V.Bytes 
+"\NUL\SOH\STX\ETX\EOT\ENQ\ACK\a\b\t\n\v\f\r\SO\SI\DLE\DC1\DC2\DC3\DC4\NAK\SYN\ETB\CAN\EM\SUB\ESC\FS\GS\RS\US !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\DEL"
+> V.pack [0..127] :: V.PrimVector Int
+[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127]
+> import qualified Z.Data.JSON as JSON
+> JSON.encode (V.pack [0..127] :: V.Bytes)
+"\"AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn8=\""
+> JSON.encode (V.pack [0..127] :: V.PrimVector Int)
+"[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127]"
+```
+
 Besides special instances, many functions in `Z.Data.Vector` will leverage rewrite rules to use more efficient instructions when used with `Bytes`, such as `break`, `takeWhile`, etc. But these optimizations should have no visible difference for users.
 
 # Text: UTF-8 encoded Bytes
 
-The `Text` type from `Z.Data.Text` is a `newtype` wrapper around `Bytes` which provides UTF-8 encoding guarantee, you should contrust a `Text` using `validate` or `validateMaybe` only:
+The `Text` type from `Z.Data.Text` is a `newtype` wrapper around `Bytes` which provides UTF-8 encoding guarantee, you should contrust a `Text` using `validate` or `validateMaybe` or string literals only:
 
 ```haskell
 > import qualified Z.Data.Text as T
@@ -113,9 +144,11 @@ The `Text` type from `Z.Data.Text` is a `newtype` wrapper around `Bytes` which p
 "hello world"
 > T.validate "hello world, \128"
 *** Exception: InvalidUTF8Exception [("validate",SrcLoc {srcLocPackage = "interactive", srcLocModule = "Ghci12", srcLocFile = "<interactive>", srcLocStartLine = 52, srcLocStartCol = 1, srcLocEndLine = 52, srcLocEndCol = 31})]
+> "你好世界" :: T.Text
+"你好世界"
 ```
 
-In Haskell, `String`s are allowed to have illegal UTF-8 code points so that any UNIX file path can be encoded in `String`, but in Z.Haskell we have a special type for file path, so `Text` will convert illegal in case of String literals:
+In Haskell, `String`s are allowed to have illegal UTF-8 code points so that any UNIX file path can be encoded in `String`, but in Z.Haskell we have a special type for file path. `Text` will convert illegal code points in case of string literals:
 
 ```haskell
 > "hello world, \55296" :: T.Text
@@ -124,7 +157,7 @@ In Haskell, `String`s are allowed to have illegal UTF-8 code points so that any 
 "hello world, \239\191\189"
 ```
 
-Note the `\239\191\189` bytes sequence is the replacement char `\U+FFFD`'s UTF-8 encoding form. By providing limited ways of creating `Text`, combinators in `Z.Data.Text` can safely assume `Text` only contain UTF-8 encoded code points.
+The `\239\191\189` bytes sequence is the replacement char `\U+FFFD`'s UTF-8 encoding form. By providing limited ways of creating `Text`, combinators in `Z.Data.Text` can safely assume `Text` only contain UTF-8 encoded code points.
 
 `Z.Data.Text` also provide some unicode processing capabilities, such as normalization, case-mapping, etc:
 

@@ -79,6 +79,39 @@ withResource (FS.initFile "./test_file" FS.O_RDWR FS.DEFAULT_FILE_MODE) $ \ file
 
 `initFile` function doesn't open the file, and it just records how to open and close the file. Every time you want to do something with the file, use `withResource` to open(and close) it, and that's all about resource handling in Z.
 
+`Resource` has a `Monad` instance, which is useful for safely combining resources, e.g. instead of writing following code:
+
+```haskell
+withResource initRes1 $ \ res1 ->
+    withResource initRes2 $ \ res2 ->
+        withResource initRes3 $ \ res3 ->
+            ... res1 ... res2 ... res3
+```
+
+You could define a combined `Resource`:
+
+```haskell
+initRes123 :: Resource (Res1, Res2, Res3)
+initRes123 = do
+    res1 <- initRes1
+    res2 <- initRes2
+    res3 <- initRes3
+    return (res1, res2, res3)
+```
+
+Now `withResource initRes123 $ \ (res1, res2, res3) -> ...` will first open `res1`, `res2`, `res3` in order, then close them in reverse order. You could even interleave `IO` action within `Resource` using its `MonadIO` instance:
+
+```haskell
+initRes123 :: Resource (Res1, Res2)
+initRes123 = do
+    res1 <- initRes1
+    res2Param <- liftIO $ ... res1 ...
+    res2 <- initRes2 res2Param
+    return (res1, res2)
+```
+
+The lifted `IO` action will become a part of the resource opening.
+
 # Buffered I/O
 
 `newBufferedInput` and `readLine` functions in the code above are from `Z.IO.Buffered` module(also re-exported from `Z.IO`). In Z-IO, many IO devices(including `File` above) are instances of `Input/Output` class:
