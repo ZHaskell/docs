@@ -187,6 +187,21 @@ Regex expressions based on [re2](https://github.com/google/re2) regex engine is 
 "http://world.com"
 ```
 
+# Print to Text
+
+`Z.Data.Text` module provide `toText` quickly convert a data type to `Text` based on `Print` class, it's similar to `Show` using `Generic` support:
+
+```
+> import GHC.Generics
+> import qualified Z.Data.Text as T
+> data Date = Date { year :: Int, month :: Int, day :: Int } deriving (Generic, T.Print)
+> T.toText $ Date 2020 1 12
+"Date {year = 2020, month = 1, day = 12}"
+```
+
+It's recommend to deriving `Print` for your data types to get fast text conversion, though current GHC compile `Generic` fair slowly. 
+
+
 # List fusion
 
 `Vec` instances and `Text` support the [build-foldr](https://wiki.haskell.org/Correctness_of_short_cut_fusion#foldr.2Fbuild) fusion by providing fusion rules enabled `pack/unpack`, following code should iterate the input vector and produce the output vector in a single pass rather than producing an intermediate list:
