@@ -77,7 +77,7 @@ Comparing to `parsec` or `megaparsec`, `Parser` in Z provides limited error repo
 
 ## Auto Backtracked Alternative
 
-Similar to `attoparsec`, `Parser` in Z always backtrack when used with `<|>` (`Alternative` instance), that means the failed branch will not consume any input without using combinators like `try`:
+Similar to `attoparsec`, `Parser` in Z always backtrack when used with `<|>` (`Alternative` instance), that means the failed branch will not consume any input without doing anything special:
 
 ```haskell
 import Control.Applicative
@@ -85,7 +85,7 @@ import Control.Applicative
 p = fooParser <|> barParser <|> quxParser
 ```
 
-In above code, if any parser failed, the next parser is retried from the beginning of current input. Backtracking is not always needed though, it recommended to use `peek` 
+In above code, if any parser failed, the next parser is retried from the beginning of the input. Backtracking is not always needed though, it recommended to use `peek` 
 or `peekMaybe` if the syntax or protocol can be parsed as LL(1) grammer since it's faster than backtracking.
 
 # Builder Monad
