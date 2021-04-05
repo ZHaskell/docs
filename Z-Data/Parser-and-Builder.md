@@ -121,7 +121,7 @@ Underhood a `Builder` records a buffer writing function, thus can be composed qu
 
 Binary `Builder` can be constructed with `encodePrim/encodePrimLE/encodePrimBE`, let's still take [MessagePack str format](https://github.com/msgpack/msgpack/blob/master/spec.md#str-format-family) as an example:
 
-```
+```haskell
 import           Data.Bits
 import           Data.Word
 import qualified Z.Data.Builder as B
