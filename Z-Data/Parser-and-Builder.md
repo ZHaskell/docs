@@ -90,7 +90,7 @@ or `peekMaybe` if the syntax or protocol can be parsed as LL(1) grammer since it
 
 # Builder Monad
 
-The `Builder` from `Z.Data.Builder` is a reverse process of parsing, i.e. writing Haskell data types to `Bytes`, aka *Writer* monad. The usage is very similiar to `Parser`:
+The `Builder` from `Z.Data.Builder` is the reverse process of parsing, i.e. writing Haskell data types to `Bytes`, aka *Writer* monad. The usage is very similiar to `Parser`:
 
 ```haskell
 import qualified Z.Data.Builder as B
@@ -110,7 +110,7 @@ dataBuilder (Date y m d) = do
            | otherwise = B.word8 DIGIT_0 >> B.int x
 ```
 
-Use `build/buildText` to run a `Builder`, which produces `Bytes` and `Text` respectively:
+Underhood a `Builder` records a buffer writing function, thus can be composed quickly. Use `build/buildText` to run a `Builder`, which produces `Bytes` and `Text` respectively:
 
 ```haskell
 > B.build (dataBuilder $ Date 2020 11 1)

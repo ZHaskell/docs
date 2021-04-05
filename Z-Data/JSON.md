@@ -5,6 +5,12 @@ title: JSON
 nav_order: 4
 ---
 
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
 Using `Z.Data.JSON` module to get humman readable serialization/deserialization. The easiest way to use the library is to define target data type, deriving
 `Generic` and `JSON` instances, which provides:
 
