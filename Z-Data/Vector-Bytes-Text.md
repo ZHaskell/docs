@@ -13,7 +13,7 @@ nav_order: 2
 
 # Vector: array slices
 
-In Haskell, we use immutable arrays a lot. And we have many array slices types:
+In Z.Haskell, we use immutable arrays a lot. And we have two main array slice types in `Z.Data.Vector`:
 
 ```haskell
 -- The payloads are array offset and length
@@ -48,17 +48,10 @@ fromArray arr offset len | offset == 0 && sizeofArr arr == len = arr
                          | otherwise = cloneArr arr offset len
 ```
 
-These instances give `Vec` great flexiblity: if your combinators are implemented with `Vec`, it will works on various slicing types, and plain array types, for example, the `map` combinator from `Z.Data.Vector`:
+These instances give `Vec` great flexiblity: if your combinators are implemented with `Vec`, it will works on various slicing types, and plain array types, for example, the `map'` combinator from `Z.Data.Vector`:
 
 ```haskell
-map :: forall u v a b. (Vec u a, Vec v b) => (a -> b) -> u a -> v b
-map f (Vec arr s l) = create l (go 0)
-  where
-    go :: Int -> MArr (IArray v) s b -> ST s ()
-    go !i !marr | i >= l = return ()
-                | otherwise = do
-                    x <- indexArrM arr (i+s); writeArr marr i (f x);
-                    go (i+1) marr
+map' :: forall u v a b. (Vec u a, Vec v b) => (a -> b) -> u a -> v b
 ```
 
 Note the input and output `Vec` type is not required to be the same, which means applications like the following are possible:
@@ -68,7 +61,7 @@ data User = User { ..., age :: Int, ...}
 
 -- | Take all user's age and pack them into a `PrimArray`.
 takeAllAges :: Vector User -> PrimArray Int
-takeAllAges = map age
+takeAllAges = map' age
 ```
 
 The above functions will work efficiently as expected, `User`'s age will be directly written into a new `PrimArray` with no extra copies.
