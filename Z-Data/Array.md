@@ -236,4 +236,4 @@ To efficiently store boxed unlifted types, `Unlifted` class and `UnliftedArray` 
 # More on arrays
 
 There're more details on Haskell arrays, such as pinned vs unpinned `ByteArray`s, etc. Interested readers could find all these details on [GHC wiki](https://gitlab.haskell.org/ghc/ghc/-/wikis/home), especially on RTS section.
-To use array proper, all you need to do is choose the proper storage type and import `Z.Data.Array`. In next section we will introduce vectors, which is simply slices of arrays.
+To use array properly, all you need to do is choose the proper storage type and import `Z.Data.Array`. In next section we will introduce vectors, which is simply slices of arrays.
