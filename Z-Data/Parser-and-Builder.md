@@ -143,7 +143,7 @@ Note that we directly use `Unalign a, Unalign b => Unalign (a, b)` instance to w
 
 ## Text formatting with `Builder`
 
-Different from other standard librarys which usually provide `printf` or similar, in Z directly using `Builder` to format text is recommended:
+Different from other standard libraries which usually provide `printf` or similar, in Z directly using `Builder` to format text is recommended:
 
 ```haskell
 -- Similar to print("The result are %d, %d", x, y)

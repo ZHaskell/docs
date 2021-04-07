@@ -11,7 +11,7 @@ nav_order: 4
 1. TOC
 {:toc}
 
-Using `Z.Data.JSON` module to get humman readable serialization/deserialization. The easiest way to use the library is to define target data type, deriving
+Using `Z.Data.JSON` module to get human readable serialization/deserialization. The easiest way to use the library is to define target data type, deriving
 `Generic` and `JSON` instances, which provides:
 
 * `fromValue` to convert `Value` to Haskell values.
