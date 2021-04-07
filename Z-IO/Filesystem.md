@@ -28,7 +28,7 @@ writeFile :: HasCallStack => CBytes -> Bytes -> IO ()
 writeTextFile :: HasCallStack => CBytes -> Text -> IO ()
 ```
 
-`CBytes` is Z's file path type. `Bytes`, and `Text` are types for binary and textual content, respectively. And these are all documented in Z-Data section. For now, all you need to know is Z-IO assumes UTF-8 encoding everywhere: both filepath and text content can be assumed this way. 
+`CBytes` is Z's file path type. `Bytes`, and `Text` are types for binary and textual content, respectively. These types are documented in [Z-Data section](https://z.haskell.world/Z-Data/). `readTextFile` and `writeTextFile` assumes UTF-8 encoding:
 
 
 ```haskell
@@ -51,7 +51,7 @@ initFile :: CBytes
          -> Resource File
 ```
 
-`FileFlag` and `FileMode` are bit constants controlling the file opening behavior, such as if we have read or write access or if a new file will be created when there's none. You can find more constants on hackage. The interesting thing here is that `initFile` function returns a `Resource File` type instead of `IO File`. `Resource` is defined in `Z.IO.Resource` module, with a function to use it:
+`FileFlag` and `FileMode` are bit constants controlling the file opening behavior, such as if we have read or write access or if a new file will be created when there's none. You can find more constants on [hackage docs](https://hackage.haskell.org/package/Z-IO-0.7.1.0/docs/Z-IO-FileSystem-Base.html#g:5). The interesting thing here is that `initFile` function returns a `Resource File` type instead of `IO File`. `Resource` is defined in `Z.IO.Resource` module, with following functions to use it:
 
 ```haskell
 withResource :: HasCallStack
@@ -77,7 +77,7 @@ withResource (FS.initFile "./test_file" FS.O_RDWR FS.DEFAULT_FILE_MODE) $ \ file
     printStd =<< readLine bi
 ```
 
-`initFile` function doesn't open the file, and it just records how to open and close the file. Every time you want to do something with the file, use `withResource` to open(and close) it, and that's all about resource handling in Z.
+`initFile` function doesn't open the file, and it just records how to open and close the file. Every time you want to do something with the file, use `withResource` to open(and close) it, that's all about resource handling in Z.
 
 `Resource` has a `Monad` instance, which is useful for safely combining resources, e.g. instead of writing following code:
 
@@ -110,7 +110,7 @@ initRes123 = do
     return (res1, res2)
 ```
 
-The lifted `IO` action will become a part of the resource opening.
+The lifted `IO` action will become a part of the resource opening process.
 
 # Buffered I/O
 
