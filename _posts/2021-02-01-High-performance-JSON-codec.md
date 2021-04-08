@@ -38,7 +38,7 @@ Surprisingly, when processing JSON, one can't directly copy strings because they
 
 These optimizations are possible because [Z-Data](//hackage.haskell.org/package/Z-Data) uses UTF8 encoding `Text` type, which could save considerable time on the non-escaping path.
 
-## IR(intermedia represatation)
+## IR(intermedia represantation)
 
 Another optimization opportunity comes from the new JSON document IR design. In [Z-Data](//hackage.haskell.org/package/Z-Data) the IR type use vector of key-value pair to represent JSON objects:
 
