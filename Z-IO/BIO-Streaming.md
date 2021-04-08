@@ -126,7 +126,6 @@ Now let's consider the following devices:
 We can have the definitions for data `Source` and `Sink` by using `Void` from `Data.Void`:
 
 ```haskell
--- Void from is a data type which doesn't have a constructor
 -- Source type doesn't need input
 type Source a = BIO Void a
 -- Sink type doesn't produce output
@@ -228,7 +227,7 @@ BIO pushA pullA >|> BIO pushB pullB = BIO push_ pull_
 This composition's type has some interesting results:
 
 + If you compose a `Source a` to `BIO a b`, you will get a `Source b`.
-+ If you compose a `BIO a b` to `Sink a`, you will get a `Sink b`.
++ If you compose a `BIO a b` to `Sink b`, you will get a `Sink a`.
 
 So let's say you want to count the line number of a file, you could use `BIO`:
 
