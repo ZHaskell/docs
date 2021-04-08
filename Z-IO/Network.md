@@ -158,4 +158,4 @@ recvUDPLoop :: HasCallStack
             -> IO ()
 ```
 
-Loop receiving(`recvUDPLoop`) can be faster since it can reuse the receiving buffer internally. Unlike the TCP server above, the UDP worker function is called on the current Haskell thread instead of a forked one. If you have heavy computations within the worker function, consider using `forkBa` from `Z.IO.UV.Manager` (a function similar to `forkIO`, but with active thread balancing or a producer-consumer architecture).
+Loop receiving(`recvUDPLoop`) can be faster since it can reuse the receiving buffer internally. Unlike the TCP server above, the UDP worker function is called on the current Haskell thread instead of a forked one. If you have heavy computations within the worker function, consider using `forkBa` from `Z.IO.UV.Manager` (a function similar to `forkIO`, but with active thread balancing).
