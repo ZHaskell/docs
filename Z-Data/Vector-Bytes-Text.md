@@ -34,7 +34,7 @@ class (Arr (IArray v) a) => Vec v a where
     fromArr :: IArray v a -> Int -> Int -> v a
 ```
 
-`Vector` and `PrimVector` are obivious instances, but plain array types are also `Vec`'s instances with `O(n)` `fromArr`, for example:
+`Vector` and `PrimVector` are obvious instances, but plain array types are also `Vec`'s instances with `O(n)` `fromArr`, for example:
 
 ```haskell
 instance Prim a => Vec PrimArray a where
@@ -48,7 +48,7 @@ fromArray arr offset len | offset == 0 && sizeofArr arr == len = arr
                          | otherwise = cloneArr arr offset len
 ```
 
-These instances give `Vec` great flexiblity: if your combinators are implemented with `Vec`, it will works on various slicing types, and plain array types, for example, the `map'` combinator from `Z.Data.Vector`:
+These instances give `Vec` great flexiblity: if your combinators are implemented with `Vec`, it will work on various slicing types, and plain array types, for example, the `map'` combinator from `Z.Data.Vector`:
 
 ```haskell
 map' :: forall u v a b. (Vec u a, Vec v b) => (a -> b) -> u a -> v b
@@ -66,7 +66,7 @@ takeAllAges = map' age
 
 The above functions will work efficiently as expected, `User`'s age will be directly written into a new `PrimArray` with no extra copies.
 
-All functions in `Z.Data.Vector` are implemented using `Vec` constraint, sometimes this will lead to type interference failures, so it's recommended to enable `TypeApplications` extension and add necessary type annotations:
+All functions in `Z.Data.Vector` are implemented using `Vec` constraint, sometimes this will lead to type inference failures, so it's recommended to enable `TypeApplications` extension and add necessary type annotations:
 
 ```haskell
 {-# LANUAGE TypeApplications #-}
@@ -111,7 +111,7 @@ Note that `Bytes`'s `Show` instance is not specialized to show ASCII characters.
 "aGVsbG8gd29scmQ="
 ```
 
-In `Z-Data` we use incoherent instance to handle `Bytes`'s JSON instance(using base64 encoding):
+In `Z-Data` we use incoherent instances to handle `Bytes`'s JSON instance(using base64 encoding):
 
 ```haskell
 > V.pack [0..127] :: V.Bytes
@@ -127,7 +127,7 @@ Besides special instances, many functions in `Z.Data.Vector` will leverage rewri
 
 # Text: UTF-8 encoded Bytes
 
-The `Text` type from `Z.Data.Text` is a `newtype` wrapper around `Bytes` which provides UTF-8 encoding guarantee, you should contrust a `Text` using `validate` or `validateMaybe` or string literals only:
+The `Text` type from `Z.Data.Text` is a `newtype` wrapper around `Bytes` which provides UTF-8 encoding guarantee, you should construct a `Text` using `validate` or `validateMaybe` or string literals only:
 
 ```haskell
 > import qualified Z.Data.Text as T
@@ -197,14 +197,14 @@ It's recommend to deriving `Print` for your data types to get fast text conversi
 
 # List fusion
 
-`Vec` instances and `Text` support the [build-foldr](https://wiki.haskell.org/Correctness_of_short_cut_fusion#foldr.2Fbuild) fusion by providing fusion rules enabled `pack/unpack`, following code should iterate the input vector and produce the output vector in a single pass rather than producing an intermediate list:
+`Vec` instances and `Text` support the [build-foldr](https://wiki.haskell.org/Correctness_of_short_cut_fusion#foldr.2Fbuild) fusion by providing fusion rules enabled `pack/unpack`, the following code should iterate the input vector and produce the output vector in a single pass rather than producing an intermediate list:
 
 ```haskell
 f :: V.Vector a -> V.Vector b
 f =  V.pack . filter h . map g . V.unpack 
 ```
 
-This is different from the following code, which will produce an intermediate vector(may not be slower though):
+This is different from the following code, which will produce an intermediate vector (may not be slower though):
 
 ```haskell
 f :: V.Vector a -> V.Vector b
