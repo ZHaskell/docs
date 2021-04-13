@@ -10,7 +10,7 @@ nav_order: 4
 1. TOC
 {:toc}
 
-Benchmarks' code are available on [Github](https://github.com/ZHaskell/benchmarks).
+Benchmarks' code are available on [GitHub](https://github.com/ZHaskell/benchmarks).
 
 Note benchmarks only record certain aspect of the code and the setup environment, they may not reflect real-world use-case. Any patches to improve the simulation as practical as possible are welcomed.
 
