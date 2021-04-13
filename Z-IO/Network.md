@@ -26,7 +26,7 @@ main = do
     -- use getAddrInfo to perform DNS resolution
     addr:_ <- getAddrInfo Nothing "www.bing.com" "http"
     -- use initTCPClient to initialize a TCP client
-    withResource (initTCPClient defaultTCPClientConfig{ 
+    withResource (initTCPClient defaultTCPClientConfig{
             tcpRemoteAddr = addrAddress addr}) $ \ tcp -> do
         -- use BufferedInput/BufferedOutput facility to read from/write to tcp socket
         i <- newBufferedInput tcp
@@ -44,7 +44,7 @@ main = do
 
 Z.Haskell provide several network capabilities:
 
-+ `Z.IO.Network.IPC` provides the stream channel for inter-process communication based on domain socket(Unix) or named pipe(Windows). 
++ `Z.IO.Network.IPC` provides the stream channel for inter-process communication based on domain socket(Unix) or named pipe(Windows).
 + `Z.IO.Network.TCP` provides the stream channel for remote communication based on TCP socket.
 + `Z.IO.Network.UDP` provides the message channel on top of the UDP socket.
 + A TLS implementation based on [botan](https://botan.randombit.net/) is under development.
@@ -55,10 +55,10 @@ Let's take TCP module as an example. Lots of low-level socket details(`bind`, `l
 -- | Connect to a TCP target
 initTCPClient :: HasCallStack => TCPClientConfig -> Resource UVStream
 -- | Start a TCP server
-startTCPServer :: HasCallStack	 
-               => TCPServerConfig	 
-               -> (UVStream -> IO ())   
-               -- ^ worker which will get an accepted TCP stream 
+startTCPServer :: HasCallStack
+               => TCPServerConfig
+               -> (UVStream -> IO ())
+               -- ^ worker which will get an accepted TCP stream
                -- and run in a seperated haskell thread
                -> IO
 ```
@@ -67,7 +67,7 @@ startTCPServer :: HasCallStack
 
 The `UVStream` type implements the `Input/Output` class from `Z.IO.Buffered`, so that you can reuse all the buffered read/write API. For example, let's say you have designed a simple framed message protocol:
 
-```
+```haskell
 import Data.Word
 import qualified Z.Data.Vector as V
 
@@ -92,9 +92,9 @@ readMessage bi = do
     payload_len_h <- readExactly buffered_i 1
     payload_len_l <- readExactly buffered_i 1
     let payload_len =
-        (fromIntegral payload_len_h) `unsafeShiftL` 8 
+        (fromIntegral payload_len_h) `unsafeShiftL` 8
             .|. (fromIntegral payload_len_l)
-    payload <- readExactly payload_len 
+    payload <- readExactly payload_len
     return (Message msg_typ payload)
 ```
 
@@ -131,10 +131,10 @@ writeMessage bo (Message msg_typ payload) = do
         B.encodePrim msg_typ
         B.encodePrimBE (V.length payload)
         B.bytes payload
-    -- you may want to add a flush after each message has been written  
+    -- you may want to add a flush after each message has been written
     -- or leave flush to the caller
     -- flushBuffer bo
-``` 
+```
 
 Z.Haskell provides many tools to deal with the streaming nature of TCP protocol (and many other streaming devices such as IPC and Files). In the next section, we will introduce the `BIO`, a more high-level streaming API.
 
