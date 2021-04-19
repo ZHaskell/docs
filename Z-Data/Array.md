@@ -88,11 +88,11 @@ class Arr (arr :: * -> * ) a where
 And we have following instances:
 
 ```haskell
--- | Boxed array type, for holding haskell ADTs.
+-- | Boxed array type, for holding Haskell ADTs.
 instance Arr Array a where
     type MArr Array = MutableArray
     ...
--- | Boxed array type, for holding haskell ADTs, but doesn't carry a card table.
+-- | Boxed array type, for holding Haskell ADTs, but doesn't carry a card table.
 instance Arr SmallArray a where
     type MArr SmallArray = SmallMutableArray
     ...
@@ -110,11 +110,11 @@ If you know how `IO` works in Haskell, `PrimMonad` simply means `ST` or `IO`. Bu
 
 # Boxed, Unboxed
 
-For many haskellers, using arrays may be the first time one wants to know what's the difference between boxed, unboxed types. It's important to spend some time explaining these buzzwords.
+For many Haskellers, using arrays may be the first time one wants to know what's the difference between boxed, unboxed types. It's important to spend some time explaining these buzzwords.
 
 In other languages, you often have to distinguish *reference* and *value*. For example, in C pointers are references to other objects. It's a memory location in hardware sense: you can use machine code to follow a reference to the memory it pointing to. While the other non-pointer types value are not memory locations, their 1-0 arrangements stands for a certain value of that type.
 
-In haskell almost every value you see is a pointer from C's perspective, i.e. a memory location point to a heap object, for example a data type like:
+In Haskell almost every value you see is a pointer from C's perspective, i.e. a memory location point to a heap object, for example a data type like:
 
 ```haskell
 data Foo = Foo Int Char
@@ -140,7 +140,7 @@ Are represented as:
 
 During runtime the value `foo` is a reference, and all the operations, e.g. pattern match, go through dereferencing. Values like this are called *boxed* because it's a reference to a box, i.e. heap objects with [info-table](https://gitlab.haskell.org/ghc/ghc/-/wikis/commentary/rts/storage/heap-objects#info-tables). The info-table contains many useful infomation about the box, such as how many words the boxed occupied, which constructor the box stand for, etc.
 
-The `3#` and `'a'#` above are haskell's non-pointer value, we call values like this *unboxed* values. Unboxed values don't have info-tables, so we really can't have them directly on heap: otherwise the GC would get confused when it scans them: without infomation from info-table, it can't decide how many bytes to copy. These values are usually belong to registers or other boxes: we generate machine code to manipulate them directly.
+The `3#` and `'a'#` above are Haskell's non-pointer value, we call values like this *unboxed* values. Unboxed values don't have info-tables, so we really can't have them directly on heap: otherwise the GC would get confused when it scans them: without infomation from info-table, it can't decide how many bytes to copy. These values are usually belong to registers or other boxes: we generate machine code to manipulate them directly.
 
 
 ## Boxed array
@@ -212,7 +212,7 @@ indexPrimArray :: Prim a => PrimArray a -> Int -> a
 
 # Lifted, Unlifted
 
-Another difference between types: unlifted and lifted, exists because in haskell we have non-strict evaluation mechanism, e.g. a value `1 + 2` may have a representation like:
+Another difference between types: unlifted and lifted, exists because in Haskell we have non-strict evaluation mechanism, e.g. a value `1 + 2` may have a representation like:
 
 ```
 +-------------+----------+---+    +-------------+----+
@@ -225,13 +225,13 @@ Another difference between types: unlifted and lifted, exists because in haskell
 
 In Haskell `1 + 2` and `3` are both references, they can be used interchangeably: a function expecting an `Int` argument can accept both pointers. This is done by *entering* the heap objects. i.e. execute the entry code following the info-table. The entry code for constructors are simply returns. For thunks the code will do evaluation and the `reserved` word above is reserved exactly for evaluation result, by writing a forward pointer and change the thunk box into an indirection box.
 
-The evaluation may fail(diverged recursion, stackoverflow, etc.), so the pointer could potentially point to an undefined value, this kind of things are called *bottom* in haskell, written as `_|_`. The intuition for this name is that all the other evaluated values have certain meaning, but bottom doesn't, it sits lower in the spectrum of determinism, concreteness, usefulness ... whatever suits your mind. Hence comes the concept of `lifted` type, i.e. types which contain `bottom` values, or more formly, inhabited by `_|_`.
+The evaluation may fail(diverged recursion, stackoverflow, etc.), so the pointer could potentially point to an undefined value, this kind of things are called *bottom* in Haskell, written as `_|_`. The intuition for this name is that all the other evaluated values have certain meaning, but bottom doesn't, it sits lower in the spectrum of determinism, concreteness, usefulness ... whatever suits your mind. Hence comes the concept of `lifted` type, i.e. types which contain `bottom` values, or more formly, inhabited by `_|_`.
 
 As you expected, most of the boxed type can be inhabited by `_|_`, the thunk may explode and terminate your program, or call `error` or `undefined` in base. And most of the unboxed types are unlifted types. e.g. It's impossible that an `Int#` would stand for an undefined value, because all 1-0 arrangements would represent a `Int#`, or put it another way: there's no way we get a bottom from `Int#`, because it doesn't have an info-table, and we can't enter it.
 
 But some boxed unlifted types do exist, e.g. `MutableArray#/Array#` are such types, their representation on heap have an info-table pointer, but they were never entered. All the primitive operations manipulating them won't enter them, and the only way to create them is via `newArray#`, `cloneArray#`, etc. 
 
-To efficiently store boxed unlifted types, `Unlifted` class and `UnliftedArray` type are introduced similar to `Prim` and `PrimArray`, `UnliftedArray` store unlifted references instead of normal haskell ADTs. Comparing `Array Array`, `UnliftedArray Array` could remove a level of redirection, i.e. remove item's `Array` box and store `Array#` directly.
+To efficiently store boxed unlifted types, `Unlifted` class and `UnliftedArray` type are introduced similar to `Prim` and `PrimArray`, `UnliftedArray` store unlifted references instead of normal Haskell ADTs. Comparing `Array Array`, `UnliftedArray Array` could remove a level of redirection, i.e. remove item's `Array` box and store `Array#` directly.
 
 # More on arrays
 
