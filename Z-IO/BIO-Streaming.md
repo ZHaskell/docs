@@ -11,7 +11,7 @@ nav_order: 3
 1. TOC
 {:toc}
 
-# BIO: push and pull
+# BIO: composable callbacks
 
 In previous sections, we have introduced the `Z.IO.Buffered` module. And it provides APIs for buffered reading and writing. When combined with [Builder and Parser]() facility, it is easy to handle some simple streaming tasks, for example, read/write packets from TCP wire. But sometimes, things could get complicated. Let's say you want to use the [zlib]() library to decompress a bytes stream from some file. The interface provided by zlib is like this:
 
@@ -109,15 +109,16 @@ So let's say you want to count the line number of a file, you could use `BIO`:
 
 ```haskell
 import Z.IO
-import Z.Data.PrimRef (readPrimIORef)
+import Z.Data.PrimRef 
 
 main :: IO ()
 main = do
     _:path:_ <- getArgs
     withResource (initSourceFromFile path) $ \ fileSource -> do
-        (counterRef, counterNode) <- newCounterNode
-        splitNode <- newLineSplitter
-        _ <- runBIO_ $ fileSource . splitNode . counterNode
+        counterRef <- newCounter 0
+        let counter = counterNode counterRef
+        splitter <- newLineSplitter
+        runBIO_ $ fileSource . splitter . counter
         printStd =<< readPrimIORef counterRef
 ```
 
