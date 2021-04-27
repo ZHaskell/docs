@@ -20,7 +20,7 @@ Above UNIX commands read a file `foo.txt` in chunks, perform gzip and base64 tra
 
 ### Partial closure 
 
-In [Z-Data]() 's parser section, we described a resumable parser, which can consume input in chunks:
+In [Z-Data's parser section](https://z.haskell.world/Z-Data/Parser-and-Builder.html), we described a resumable parser, which can consume input in chunks:
 
 ```haskell
 > P.parse' dateParser "2020-12-12"
@@ -42,7 +42,7 @@ data Result e r
     | Partial (V.Bytes -> Result e r)
 ```
 
-The `Partial` constructor contains a closure capturing the last chunk's parsing state, which could be applied to the next chunk to produce a new `Result`. Now let's consider if we could apply this construction to IO(or an arbitrary monad), following definition is from the [streaming]() package:
+The `Partial` constructor contains a closure capturing the last chunk's parsing state, which could be applied to the next chunk to produce a new `Result`. Now let's consider if we could apply this construction to IO(or an arbitrary monad), following definition is from the [streaming](https://hackage.haskell.org/package/streaming) package:
 
 ```haskell
 data Stream f m r = Step !(f (Stream f m r))
@@ -76,7 +76,7 @@ With the `Stream`'s `Monad` instance, the value of foo now becomes a chain of St
 Step (1 :> Step (2 :>  Effect (Return <$> readLn)))
 ```
 
-Now if we provide a function to iterate through this ADT, the stream could be processed. This function is often called an interpreter, i.e. [the free monad design pattern](https://softwareengineering.stackexchange.com/questions/242795/what-is-the-free-monad-interpreter-pattern). For example streaming provides its own `foldrM` to fold over a `Stream` structure:
+Now if we provide a function to iterate through this ADT, the stream could be processed. Such a function is often called an interpreter, a term from [the free monad design pattern](https://softwareengineering.stackexchange.com/questions/242795/what-is-the-free-monad-interpreter-pattern). For example streaming provides its own `foldrM` interpreter to fold over a `Stream` structure:
 
 ```haskell
 foldrM :: Monad m => (a -> m r -> m r) -> Stream (Of a) m r -> m r
@@ -135,7 +135,7 @@ A free monad construction for streaming may also need to provide a different set
 
 ### How other languages do streaming
 
-It's interesting to find out that most of the OO languages solve this problem in a much simpler way, e.g.
+It's interesting to find out that most of the OO languages solve this problem in a much simpler way, for example in javascript.
 
 ```javascript
 // from node.js example
@@ -152,7 +152,7 @@ r.on('data', (chunk) => { z.write(chunk); });
 z.on('data', (chunk) => { w.write(chunk); });
 ```
 
-In OO's viewpoint, a stream node is an object, with a method to receive chunks, and write to downstream callbacks. That's it! Of course, this pattern has some drawbacks:
+In OO's viewpoint, a stream node is an object, with a method to receive chunks, and write to downstream inside callbacks, and that's it. This pattern has some drawbacks:
 
 + Stream node somehow lost its control, e.g. you can't stop the stream processing in a middle node without touching the source. This is the *Inversion of Control* problem of all callback-based APIs.
 + Stream node now became a mutable stateful object, which is unnatural in Haskell.
@@ -163,7 +163,7 @@ In [Z-IO](https://hackage.haskell.org/package/Z-IO) v0.8, we introduce a new `BI
 
 + Simple composable types.
 + No transformer, no lift.
-+ Easier to be used for both library and application.
++ Easier to be used for writing both processors and applications.
 
 The result is a type focusing on *callback transformation*:
 
@@ -188,7 +188,7 @@ compressBIO :: ZStream -> BIO V.Bytes V.Bytes
 compressBIO zs = \ callback mbs ->
     case mbs of
         Just bs -> do
-            -- feed input chunk to `ZStream`
+            -- feed input chunk to ZStream
             set_avail_in zs bs (V.length bs)
             let loop = do
                     oavail :: CUInt <- withCPtr zs $ \ ps -> do
@@ -206,7 +206,7 @@ compressBIO zs = \ callback mbs ->
         _ -> ... similar to above, with no input chunk and Z_FINISH flag
 ```
 
-When implemented a `Source`, you should ignore the `EOF` param, and call the callback param once a new chunk is ready. You should assume the `EOF` param is only given once, so a loop is often needed:
+When implemented a `Source`, you just ignore the `EOF` param, and call the callback once a new chunk is ready.
 
 ```haskell
 -- | Turn a `IO` action into 'Source'
@@ -219,7 +219,7 @@ sourceFromIO io = \ k _ ->
     in loop
 ```
 
-Similar to `Source`, a `Sink` doesn't need to write any output until the final `EOF`:
+You should assume the `EOF` param is only given once, so a loop is often needed. Similar to `Source`, a `Sink` doesn't need to write any output until the final `EOF`:
 
 ```haskell
 sinkToIO :: HasCallStack => (a -> IO ()) -> Sink a
