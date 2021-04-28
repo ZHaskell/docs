@@ -67,13 +67,13 @@ foo :: Stream (Of a) IO ()
 foo = do
     yield 1
     yield 2
-    liftIO readLn
+    lift readLn >>= yield
 ``` 
 
 With the `Stream`'s `Monad` instance, the value of foo now becomes a chain of Stream ADTs:
 
 ```haskell
-Step (1 :> Step (2 :>  Effect (Return <$> readLn)))
+Step (1 :> Step (2 :>  Effect (\ x -> Step x :> Return ()) <$> readLn))
 ```
 
 Now if we provide a function to iterate through this ADT, the stream could be processed. Such a function is often called an interpreter, a term from [the free monad design pattern](https://softwareengineering.stackexchange.com/questions/242795/what-is-the-free-monad-interpreter-pattern). For example streaming provides its own `foldrM` interpreter to fold over a `Stream` structure:
@@ -249,7 +249,7 @@ base64AndCompressFile origin target = do
             runBIO_ $ src . base64Enc . zlibCompressor . sink
 ```
 
-Above code is similar to command line `cat origin | base | gzip | > target`, and `runBIO_` is defined simply as:
+Above code is similar to command line `cat origin | base | gzip > target`, and `runBIO_` is defined simply as:
 
 ```haskell
 -- | Discards a value, used as the callback to `Sink`.

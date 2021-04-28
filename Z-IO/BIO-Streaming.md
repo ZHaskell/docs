@@ -31,7 +31,7 @@ type BIO inp out = (Maybe out -> IO ()) -> Maybe inp -> IO ()
 
 Conceptually a `BIO` is a box doing transformation on data callbacks:
 
-```
+```haskell
 -- A pattern synonym for more meaningful pattern match
 pattern EOF :: Maybe a
 pattern EOF = Nothing
@@ -133,3 +133,23 @@ runBIO_ :: BIO inp out -> IO ()
 {-# INLINABLE runBIO_ #-}
 runBIO_ bio = bio discard EOF
 ```
+
+Another example from the [introduce BIO blog post](https://z.haskell.world/design/2021/04/20/introduce-BIO-a-simple-streaming-abstraction.html):
+
+```haskell
+import Z.Data.CBytes    (CBytes)
+import Z.IO
+import Z.IO.BIO
+import Z.IO.BIO.Zlib
+
+base64AndCompressFile :: HasCallStack => CBytes -> CBytes -> IO ()
+base64AndCompressFile origin target = do
+    base64Enc <- newBase64Encoder
+    (_, zlibCompressor) <- newCompress defaultCompressConfig{compressWindowBits = 31}
+
+    withResource (initSourceFromFile origin) $ \ src ->
+        withResource (initSinkToFile target) $ \ sink ->
+            runBIO_ $ src . base64Enc . zlibCompressor . sink
+```
+
+Above code is similar to command line `cat origin | base | gzip > target`.
