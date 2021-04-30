@@ -48,18 +48,18 @@ fooBIO callback maybeFoo = do
             callback (Just ...)
             ...
         EOF ->
-            .. you should pass EOF to callback to indicate current
-            .. node also reaches its EOF
+            ... you should pass EOF to callback to indicate current
+            ... node also reaches its EOF
             callback EOF
 ```
 
 `BIO` type have two params:
 
 + A `callback :: Maybe out -> IO ()`(often written as `k`) which get called when to write downstream:
-    + A `Just` value is an item passed to downstream.
+    + A `Just out` value is an item passed to downstream.
     + A `EOF` notified downstream EOF.
-+ A `Maybe` value which comes from upstream:
-    + A `Just` value is an item from upstream.
++ A `Maybe inp` value which comes from upstream:
+    + A `Just inp` value is an item from upstream.
     + A `EOF` notified upstream EOF.
 
 Let's take zlib's `z_streamp` as an example to implement a compressing BIO node:
