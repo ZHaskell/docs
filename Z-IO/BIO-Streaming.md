@@ -13,7 +13,7 @@ nav_order: 3
 
 # BIO: composable callbacks
 
-In previous sections, we have introduced the `Z.IO.Buffered` module. And it provides APIs for buffered reading and writing. When combined with [Builder and Parser]() facility, it is easy to handle some simple streaming tasks, for example, read/write packets from TCP wire. But sometimes, things could get complicated. Let's say you want to use the [zlib]() library to decompress a bytes stream from some file. The interface provided by zlib is like this:
+In previous sections, we have introduced the `Z.IO.Buffered` module. And it provides APIs for buffered reading and writing. When combined with [Builder and Parser]() facility, it is easy to handle some simple streaming tasks, for example, read/write packets from TCP wire. But sometimes, things could get complicated. Let's say you want to use the [zlib](https://zlib.net) library to decompress a bytes stream from some file. The interface provided by zlib is like this:
 
 ```c
 int inflateInit (z_streamp strm, int level);
@@ -42,24 +42,50 @@ fooBIO callback maybeFoo = do
     case maybeFoo of
         Just foo ->
             ... you can send result to downstream by pass Just values
-            ... to callback, and you can call callback multiple time.
+            ... to callback, and you can call callback multiple times.
             callback (Just ...)
             ...
             callback (Just ...)
             ...
         EOF ->
-            ... Nothing input indicate EOF
             .. you should pass EOF to callback to indicate current
             .. node also reaches its EOF
             callback EOF
 ```
 
-Let's take zlib's `z_streamp` as an example:
+`BIO` type have two params:
 
-+ A `z_streamp` struct could be `push`ed with an input chunk using `inflate`, possibly producing an output chunk. 
-+ If input reached EOF, use `inflateEnd` to `pull` the trailing compressed bytes buffered inside `z_streamp` struct.
++ A `callback :: Maybe out -> IO ()`(often written as `k`) which get called when to write downstream:
+    + A `Just` value is an item passed to downstream.
+    + A `EOF` notified downstream EOF.
++ A `Maybe` value which comes from upstream:
+    + A `Just` value is an item from upstream.
+    + A `EOF` notified upstream EOF.
 
-The `Z.IO.BIO` module provides various `BIO` node types, from UTF-8 decoder to counter node. Most of them are stateful, so you should create a new node each time.
+Let's take zlib's `z_streamp` as an example to implement a compressing BIO node:
+
+```haskell
+compressBIO :: ZStream -> BIO V.Bytes V.Bytes
+compressBIO zs = \ callback mbs ->
+    case mbs of
+        Just bs -> do
+            -- feed input chunk to ZStream
+            set_avail_in zs bs (V.length bs)
+            let loop = do
+                    oavail :: CUInt <- withCPtr zs $ \ ps -> do
+                        -- perform deflate and peek output buffer remaining
+                        throwZlibIfMinus_ (deflate ps (#const Z_NO_FLUSH))
+                        (#peek struct z_stream_s, avail_out) ps
+                    when (oavail == 0) $ do
+                        -- when output buffer is full,
+                        -- freeze chunk and call the callback
+                        oarr <- A.unsafeFreezeArr =<< readIORef bufRef
+                        callback (Just (V.PrimVector oarr 0 bufSiz))
+                        newOutBuffer           
+                        loop
+            loop
+        _ -> ... similar to above, with no input chunk and Z_FINISH flag
+```
 
 # Source and Sink types
 
@@ -77,7 +103,7 @@ type Source a = BIO Void a
 type Sink a = BIO a Void
 ```
 
-Because `Void` type doesn't have constructors, thus `push` values other than `Nothing` to `Source` is impossible, one should ignore the `Maybe Void` param when defining a `Source`. For example, a `BIO` node sourcing chunks from `BufferedInput` can be implemented like this:
+Because `Void` type doesn't have constructors, one should ignore the `Maybe Void` param when defining a `Source`. For example, a `BIO` node sourcing chunks from `BufferedInput` can be implemented like this:
 
 ```haskell
 sourceFromBuffered :: BufferedInput -> Source V.Bytes
@@ -87,7 +113,7 @@ sourceFromBuffered i = \ k _ ->
     in loop
 ```
 
-For `type Sink a = BIO a Void`, the callback type is `Maybe Void -> IO ()`, which means you can only pass `Nothing` to the callback, the convention here is to only call callback once with `Nothing` on EOF:
+For `type Sink a = BIO a Void`, the callback type is `Maybe Void -> IO ()`, which means you can only pass `EOF` to the callback, the convention here is to only call callback when EOF:
 
 ```haskell
 -- | The `BufferedOutput` device will get flushed only on EOF.
