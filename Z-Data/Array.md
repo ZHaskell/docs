@@ -13,7 +13,7 @@ nav_order: 1
 
 # Array in Haskell
 
-Unlike the ubiquitous linked list type `[a]`. In Haskell arrays doesn't have any built-in syntax support, or any other special compiler support expects some built-in primitive functions, which can be found in [ghc-prim](http://hackage.haskell.org/package/ghc-prim/docs/GHC-Prim.html):
+Unlike the ubiquitous linked list type `[a]`. In Haskell arrays doesn't have any built-in syntax support, or any other special compiler support excepts some built-in primitive functions, which can be found in [ghc-prim](http://hackage.haskell.org/package/ghc-prim/docs/GHC-Prim.html):
 
 ```haskell
 newArray# :: Int# -> a -> State# s -> (# State# s, MutableArray# s a #)
