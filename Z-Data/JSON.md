@@ -18,6 +18,15 @@ Using `Z.Data.JSON` module to get human readable serialization/deserialization. 
 * `toValue` to convert Haskell values to `Value`.
 * `encodeJSON` to directly write Haskell value into JSON bytes.
 
+```haskell
+class JSON a where
+  ...
+  toValue :: a -> Value
+  fromValue :: Value -> Converter a
+  encodeJSON :: a -> B.Builder () -- `Z.Data.Builder` as `B`
+  ...
+```
+
 For example,
 
 ```haskell
