@@ -59,13 +59,13 @@ The `Generic` based instances convert Haskell data with following rules:
 
 * Constructors without payloads are encoded as JSON String, `data T = A | B` are encoded as `"A"` or `"B"`.
 * Single constructor are ingored if there're payloads, `data T = T ...`,  `T` is ingored:
-* Records are encoded as JSON object. `data T = T{k1 :: .., k2 :: ..}` are encoded as `{"k1":...,"k2":...}`.
-* Plain product are encoded as JSON array. `data T = T t1 t2` are encoded as "[x1,x2]".
-* Single field plain product are encoded as it is, i.e. `data T = T t` are encoded as "t" just like its payload.
+  * Records are encoded as JSON object. `data T = T{k1 :: .., k2 :: ..}` are encoded as `{"k1":...,"k2":...}`.
+  * Plain product are encoded as JSON array. `data T = T t1 t2` are encoded as "[x1,x2]".
+  * Single field plain product are encoded as it is, i.e. `data T = T t` are encoded as "t" just like its payload.
 * Multiple constructors are convert to single key JSON object if there're payloads:
-* Records are encoded as JSON object like above. `data T = A | B {k1 :: .., k2 :: ..}` are encoded as
+  * Records are encoded as JSON object like above. `data T = A | B {k1 :: .., k2 :: ..}` are encoded as
     `{"B":{"k1":...,"k2":...}}` in `B .. ..` case, or `"A"` in `A` case.
-* Plain product are similar to above, wrappered by an outer single-key object layer marking which constructor.
+  * Products inside a sum type are similar to above, wrappered by an outer single-key object layer marking which constructor.
 
 These rules apply to user defined ADTs, but some built-in instances have different behaviours, namely:
 
