@@ -11,7 +11,7 @@ nav_order: 4
 1. TOC
 {:toc}
 
-Using `Z.Data.JSON` module to get human readable serialization/deserialization. The easiest way to use the library is to define target data type, deriving
+Using `Z.Data.JSON` module to get human-readable serialization/deserialization. The easiest way to use the library is to define a target data type, deriving
 `Generic` and `JSON` instances, which provides:
 
 * `fromValue` to convert `Value` to Haskell values.
@@ -65,7 +65,7 @@ The `Generic` based instances convert Haskell data with following rules:
 * Multiple constructors are convert to single key JSON object if there're payloads:
   * Records are encoded as JSON object like above. `data T = A | B {k1 :: .., k2 :: ..}` are encoded as
     `{"B":{"k1":...,"k2":...}}` in `B .. ..` case, or `"A"` in `A` case.
-  * Products inside a sum type are similar to above, wrappered by an outer single-key object layer marking which constructor.
+  * Products inside a sum type are similar to above, wrapped by an outer single-key object layer marking which constructor used during data construction.
 
 These rules apply to user defined ADTs, but some built-in instances have different behaviours, namely:
 
@@ -131,6 +131,6 @@ Right (Person {name = "Joe", age = 12})
 
 The `Value` type is different from aeson's one in that we use `Vector (Text, Value)` to represent JSON objects, thus
 we can choose different strategies on key duplication, the lookup map type, etc. so instead of a single `withObject`,
-we provide `withHashMap`, `withHashMapR`, `withFlatMap` and `withFlatMapR` which use different lookup map type, and different key order piority. Most of time `FlatMap` is faster than `HashMap` since we only use the lookup map once, the cost of constructing a `HashMap` is higher. If you want to directly working on key-values, `withKeyValues` provide key-values vector access.
+we provide `withHashMap`, `withHashMapR`, `withFlatMap` and `withFlatMapR` which use different lookup map type, and different key order priority. Most of the time `FlatMap` is faster than `HashMap` since we only use the lookup map once, the cost of constructing a `HashMap` is higher. If you want to directly work on key-values, `withKeyValues` provide key-values vector access.
 
-There're some useful tools to help write encoding code in `Z.Data.JSON.Builder` module, such as JSON string escaping tool, etc. If you don't particularly care for fast encoding, you can also use `toValue` together with value builder, the overhead is usually very small.
+There're some useful tools to help write encoding code in `Z.Data.JSON.Builder` module, such as a JSON string escaping tool, etc. If you don't particularly care for fast encoding, you can also use `toValue` together with value builder, the overhead is usually very small.
